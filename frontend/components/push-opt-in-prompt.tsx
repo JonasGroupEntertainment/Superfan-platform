@@ -23,15 +23,21 @@ interface PushOptInPromptProps {
   alreadySubscribed?: boolean;
 }
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToBuffer(base64String: string): ArrayBuffer {
+  // Construct a fresh ArrayBuffer (not ArrayBufferLike) so the result is
+  // typed strictly enough for PushSubscriptionOptions.applicationServerKey.
+  // Newer TS lib.dom (Next.js 16 / TS 5.9+) tightened BufferSource to
+  // exclude SharedArrayBuffer; a plain `new Uint8Array(n)` defaults to
+  // Uint8Array<ArrayBufferLike> which fails the check.
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
+  const buffer = new ArrayBuffer(rawData.length);
+  const view = new Uint8Array(buffer);
   for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
+    view[i] = rawData.charCodeAt(i);
   }
-  return outputArray;
+  return buffer;
 }
 
 export default function PushOptInPrompt({
@@ -74,7 +80,7 @@ export default function PushOptInPrompt({
         }
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey as string),
+          applicationServerKey: urlBase64ToBuffer(vapidPublicKey as string),
         });
       }
 
