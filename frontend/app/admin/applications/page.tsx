@@ -1,4 +1,5 @@
 import { listApplications } from "@/lib/data/applications";
+import ApplicationActions from "./application-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +30,9 @@ export default async function AdminApplicationsPage() {
           Artist applications
         </h1>
         <p className="mt-2 text-sm text-white/60">
-          Submissions from /for-artists/apply. Approve / reject actions land in
-          Phase F.1.B — for now this is read-only intake.
+          Submissions from /for-artists/apply. Approve a pending row to record
+          the slug, notify the team in Slack, and email the contact an
+          onboarding link. Reject closes the row and notifies Slack.
         </p>
       </header>
 
@@ -72,7 +74,9 @@ export default async function AdminApplicationsPage() {
                   <p className="mt-1 text-[11px] text-white/40">
                     {new Date(a.created_at).toLocaleString()}
                     {a.genres?.length ? ` · ${a.genres.join(" / ")}` : ""}
-                    {a.monthly_listeners ? ` · ${a.monthly_listeners.toLocaleString()} monthly` : ""}
+                    {a.monthly_listeners
+                      ? ` · ${a.monthly_listeners.toLocaleString()} monthly`
+                      : ""}
                   </p>
                 </div>
                 <span
@@ -81,11 +85,13 @@ export default async function AdminApplicationsPage() {
                   {a.status}
                 </span>
               </div>
+
               {a.community_pitch && (
                 <p className="mt-3 rounded-xl bg-black/30 p-3 text-xs text-white/65 whitespace-pre-line">
                   {a.community_pitch}
                 </p>
               )}
+
               {a.social.length > 0 && (
                 <p className="mt-3 text-xs text-white/55">
                   Social:{" "}
@@ -94,12 +100,32 @@ export default async function AdminApplicationsPage() {
                     .join(" · ")}
                 </p>
               )}
+
               {a.manager_name && (
                 <p className="mt-2 text-xs text-white/55">
                   Manager: {a.manager_name}
                   {a.manager_email ? ` (${a.manager_email})` : ""}
                 </p>
               )}
+
+              {/* Phase F.1.B — review actions for pending rows;
+                  reviewer trail for resolved rows. */}
+              <div className="mt-4 border-t border-white/10 pt-3">
+                {a.status === "pending" ? (
+                  <ApplicationActions
+                    applicationId={a.id}
+                    defaultSlug={a.slug_suggestion ?? ""}
+                    displayName={a.display_name}
+                  />
+                ) : a.reviewed_at ? (
+                  <p className="text-[11px] text-white/55">
+                    {a.status} ·{" "}
+                    {new Date(a.reviewed_at).toLocaleString()}
+                    {a.approved_slug ? ` · slug: ${a.approved_slug}` : ""}
+                    {a.review_notes ? ` · "${a.review_notes}"` : ""}
+                  </p>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
