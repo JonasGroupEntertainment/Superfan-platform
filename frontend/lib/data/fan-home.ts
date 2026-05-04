@@ -128,8 +128,7 @@ export async function getFanHomeData(): Promise<FanHomeData | null> {
 
   // Fan profile
   const { data: fan } = await admin
-    .from("fans")
-    .select("*")
+    .from("fans").select("*, current_streak_days, longest_streak_days, last_active_date")
     .eq("id", user.id)
     .maybeSingle();
 
