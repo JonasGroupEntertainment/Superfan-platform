@@ -1125,6 +1125,101 @@ After all 10 pass, briefs are launch-ready.
 
 ---
 
+## 🎯 Stickiness mechanics (Phase 1-7 shipped 2026-05-04)
+
+Seven fan-retention systems shipped end-to-end in one session. Backend + UI all live in production. Migrations applied; all commits green.
+
+### ✅ Shipped
+
+| Phase | Mechanic | Commit | Schema |
+|---|---|---|---|
+| 1 | Daily streak counter + milestones (7/30/100/365) | `df5eac1` | `fans.{current_streak_days,longest_streak_days,last_active_date,streak_started_at}` + `streak_log` |
+| 2 | Web Push + SMS + per-fan preferences | `9de1c46` | `push_subscriptions` + `notification_preferences` + `notification_log` |
+| 3 | "Your week" personal recap tile | `f422691` | (no schema — pure compute) |
+| 4 | Limited-time drops + countdown + 1h-warning push | `d66a126` | `rewards_catalog.{is_drop,drops_at,expires_at}` + `reward_drop_notifications` |
+| 5 | Top fans this month leaderboard | `08212fd` | (no schema — pure compute) |
+| 6 | Predictions with admin resolution + correct-guess points | `d6daf46` | `community_posts.{correct_option_id,resolved_at,points_for_correct,prediction_closes_at}` + `prediction_award_log` + enum value `'prediction'` |
+| 7 | Fan-artist anniversary moments + daily cron | `91fd351` | `fan_anniversary_log` |
+
+### ⚠️ Manual wire-ups still needed before launch
+
+- [ ] **Phase 4 — Admin form drop fields** — Add the `is_drop` checkbox + `drops_at` / `expires_at` datetime inputs to `frontend/app/admin/rewards/[id]/reward-form.tsx` AND `frontend/app/admin/rewards/new/reward-form.tsx`. Drop-in JSX in `_fe_drops/README.md`. Until this is done, drops can only be flagged via SQL.
+- [ ] **Phase 6 — Prediction feed render** — Add a `kind === 'prediction'` branch to the community feed renderer that mounts `<PredictionCard />`. Drop-in 5-line JSX in `_fe_predictions/README.md`. Until this is done, prediction posts render as plain untitled rows.
+- [ ] **Phase 2 — Push icon assets** — Add `/public/icon-192.png` (192×192 app icon) + `/public/badge-72.png` (72×72 monochrome badge for Android tray). Without these, browsers fall back to a generic bell on push notifications.
+
+### 📅 Post-launch refinements (deferred, not blocking)
+
+**Phase 1.5 — Streak**
+- Point multipliers on actions (2× / 3× while streak active)
+
+**Phase 2.5 — Notifications**
+- Event-match push trigger (preference column wired; cron `event-match-prepare` doesn't yet call `sendNotification`)
+- iOS Safari support (requires PWA manifest)
+
+**Phase 3.5 — Recap**
+- Generated share image (PNG/canvas SSR) for IG Stories
+- Calendar-week alignment vs rolling 7-day window (2-line change in `lib/personal-recap/gather.ts`)
+- Cached `weekly_recap` table — only if p95 slips
+- Year-end "Wrapped" — same gather over 365-day window
+
+**Phase 4.5 — Drops**
+- Sold-out detection (skip 1h-warning push if `stock = 0`)
+- Drops calendar admin view (listing upcoming/live/expired in one screen)
+- Email channel for drops
+- Geographic launches (regional drops)
+
+**Phase 5.5 — Leaderboard**
+- Materialized view caching (only if `gatherArtistLeaderboard` p95 > 500ms)
+- Anonymized rank private mode (opt-in column on `notification_preferences`)
+- Cross-month history view ("Top fans of April" admin lookback)
+- Permanent founder ribbon for fans who hit #1 three months running
+
+**Phase 6.5 — Predictions**
+- Admin queue page listing all unresolved predictions
+- Auto-close grace period (5-min late-vote window with warning)
+- Prediction-specific notify preference column
+- Multi-correct predictions ("pick all that apply")
+
+**Phase 7.5 — Anniversaries**
+- AI-personalized anniversary message via `lib/drafts`
+- Email channel for anniversaries via Mailchimp
+- Anniversary badge in the badges system
+- Whole-platform anniversary based on `fans.created_at`
+- Anniversary-card UI on Fan Home showing next upcoming milestone with countdown
+
+### ⏸️ Phase 8 — Live listening party / live chat (deferred)
+
+- **Live listening parties** — Supabase Realtime channel + live-chat composer + admin orchestration tools (start session, eject misbehaving fans, bulk push followers with calendar invite, points award for fans who were "present"). Heaviest item on the original ranked list (~5 days dev).
+- **Defer trigger:** revisit when ≥3 active artists each have ≥50 followers. Without that audience, no live session has enough humans to feel alive.
+
+### 🔐 New env vars (Phase 2)
+
+| Variable | Purpose | Status |
+|---|---|---|
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Public VAPID key for browser push subscribe | ✅ set |
+| `VAPID_PRIVATE_KEY` | Private VAPID key for server-side push send | ✅ set |
+| `VAPID_SUBJECT` | `mailto:kevinjonassr@gmail.com` — sender identity for push services | ✅ set |
+
+### 📊 New cron schedules
+
+- `*/15 * * * *` — `/api/cron/drops-notifier` (Phase 4: drop-launched + 1h-warning pushes)
+- `0 14 * * *` — `/api/cron/anniversary-notifier` (Phase 7: daily anniversary scan, 9am Central)
+
+### 🧪 Pre-launch smoke test sequence
+
+To verify all seven phases work end-to-end before opening signups:
+
+1. **Streak** — sign in, refresh Fan Home → streak tile shows "1 day" + "+5 pts."
+2. **Push** — click the opt-in banner, allow OS prompt → row in `push_subscriptions`. Have a second account post a comment on one of yours → push lands within ~5s.
+3. **Recap** — react to ≥1 post / RSVP ≥1 event / earn any points → "Your week" tile populates with non-zero stats.
+4. **Drops** — temporarily flag a reward as `is_drop = true` with `expires_at = now() + 90 min` via SQL → countdown chip renders amber "Ends in 1h 29m" and tics down.
+5. **Leaderboard** — accumulate any community activity → mini-card on `/artists/raelynn` and full board at `/artists/raelynn/leaderboard` show the fan ranked.
+6. **Predictions** — once feed is wired, create a prediction post via admin → vote as fan → resolve as admin → +N pts hits the ledger and push fires to voters.
+7. **Anniversaries** — backdate a `fan_artist_following.followed_at` by 30 days → curl the cron with bearer token → row in `fan_anniversary_log` + +25 pts + push.
+
+
+---
+
 ## ✅ Done
 
 Recorded for the paper trail:
