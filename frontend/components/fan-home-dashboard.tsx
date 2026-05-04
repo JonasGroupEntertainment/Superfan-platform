@@ -39,7 +39,7 @@ const STRIP_DEFAULT_FOCAL_Y = 0;
  * above the existing marketing content. All data comes from getFanHomeData()
  * so there are no client-side fetches here.
  */
-export default function FanHomeDashboard({ data, streak, recap }: { data: FanHomeData; streak?: { currentStreakDays: number; longestStreakDays: number; pointsAwardedThisVisit: number; newMilestone: number | null; isNewToday: boolean; lastActiveDate: string | null; recap?: WeeklyRecap | null } | null }) {
+export default function FanHomeDashboard({ data, streak, recap }: { data: FanHomeData; streak?: { currentStreakDays: number; longestStreakDays: number; pointsAwardedThisVisit: number; newMilestone: number | null; isNewToday: boolean; lastActiveDate: string | null } | null; recap?: WeeklyRecap | null }) {
   const {
     fan,
     followedArtists,
