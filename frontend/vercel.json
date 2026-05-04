@@ -35,6 +35,10 @@
     {
       "path": "/api/cron/drops-notifier",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/anniversary-notifier",
+      "schedule": "0 14 * * *"
     }
   ]
 }
