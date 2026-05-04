@@ -1,4 +1,6 @@
 import Link from "next/link";
+import WeeklyRecapTile from "@/components/weekly-recap-tile";
+import type { WeeklyRecap } from "@/lib/personal-recap/types";
 import PushOptInBanner from "@/components/push-opt-in-banner";
 import StreakTile from "@/components/streak-tile";
 import type { FanHomeData, FanHomeUpcomingEvent } from "@/lib/data/fan-home";
@@ -37,7 +39,7 @@ const STRIP_DEFAULT_FOCAL_Y = 0;
  * above the existing marketing content. All data comes from getFanHomeData()
  * so there are no client-side fetches here.
  */
-export default function FanHomeDashboard({ data, streak }: { data: FanHomeData; streak?: { currentStreakDays: number; longestStreakDays: number; pointsAwardedThisVisit: number; newMilestone: number | null; isNewToday: boolean; lastActiveDate: string | null } | null }) {
+export default function FanHomeDashboard({ data, streak, recap }: { data: FanHomeData; streak?: { currentStreakDays: number; longestStreakDays: number; pointsAwardedThisVisit: number; newMilestone: number | null; isNewToday: boolean; lastActiveDate: string | null; recap?: WeeklyRecap | null } | null }) {
   const {
     fan,
     followedArtists,
@@ -77,6 +79,7 @@ export default function FanHomeDashboard({ data, streak }: { data: FanHomeData; 
         pointsAwardedThisVisit={streak.pointsAwardedThisVisit}
         newMilestone={streak.newMilestone}
       />}
+      {recap && <WeeklyRecapTile recap={recap} firstName={data.fan?.first_name ?? null} />}
       <FollowedArtistsStrip artists={followedArtists} />
 
       {/* Upcoming events — top 3 from any followed artist */}
