@@ -178,3 +178,33 @@ export async function markSetupCompleteAction(
   revalidatePath(`/artists`);
   return { ok: true, message: "Community is live" };
 }
+
+/**
+ * Void-returning shims for direct <form action={...}> use.
+ *
+ * Next.js 16 requires server actions passed straight to <form action> to
+ * return Promise<void>. The richer ActionResult variants above are still
+ * used from client components via useTransition (Profile/Branding/Social
+ * forms) where we want to surface error / success messages inline.
+ *
+ * For Initialize and Mark-complete, the page revalidates after the call
+ * and re-renders with fresh state, which is itself the success signal.
+ * Errors throw so they hit Next's error boundary and the admin sees them.
+ */
+export async function initializeCommunityFormAction(
+  formData: FormData,
+): Promise<void> {
+  const result = await initializeCommunityAction(formData);
+  if (!result.ok) {
+    throw new Error(result.error ?? "init_failed");
+  }
+}
+
+export async function markSetupCompleteFormAction(
+  formData: FormData,
+): Promise<void> {
+  const result = await markSetupCompleteAction(formData);
+  if (!result.ok) {
+    throw new Error(result.error ?? "mark_complete_failed");
+  }
+}

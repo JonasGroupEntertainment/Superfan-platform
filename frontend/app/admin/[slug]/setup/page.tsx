@@ -3,8 +3,8 @@ import Link from "next/link";
 import { getAdminUser } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
-  initializeCommunityAction,
-  markSetupCompleteAction,
+  initializeCommunityFormAction,
+  markSetupCompleteFormAction,
 } from "./setup-actions";
 import ProfileForm from "./profile-form";
 import BrandingForm from "./branding-form";
@@ -163,7 +163,7 @@ export default async function SetupPage({ params }: PageProps) {
                 : "We'll create the artist row, community row, default reward catalog, and welcome post using the slug. You'll fill in profile copy in the next step."}
             </p>
           </div>
-          <form action={initializeCommunityAction}>
+          <form action={initializeCommunityFormAction}>
             <input type="hidden" name="slug" value={slug} />
             <button
               type="submit"
@@ -305,7 +305,7 @@ export default async function SetupPage({ params }: PageProps) {
                   View public page →
                 </Link>
               ) : (
-                <form action={markSetupCompleteAction}>
+                <form action={markSetupCompleteFormAction}>
                   <input type="hidden" name="slug" value={slug} />
                   <button
                     type="submit"
