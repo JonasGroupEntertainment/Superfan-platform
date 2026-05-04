@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LeaderboardMiniCard from "@/components/leaderboard-mini-card";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { listArtists } from "@/lib/artists";
@@ -332,6 +333,9 @@ export default async function ArtistPage({
           })}
         </div>
       </section>
+
+      {/* Top fans leaderboard preview */}
+      <LeaderboardMiniCard artistSlug={slug} />
 
       {/* Merch */}
       <section className="glass-card p-8">
