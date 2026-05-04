@@ -182,16 +182,32 @@ export async function touchStreak(fanId: string): Promise<StreakState> {
         : []),
     ]);
 
-    // 3. Award the badge if a milestone was hit (idempotent — earned_badges
-    //    enforces unique (fan_id, badge_slug) so re-runs are safe).
+    // 3. Award the badge if a milestone was hit. Table is `fan_badges`
+    //    (verified against FE Supabase schema) with columns:
+    //    fan_id, badge_slug, earned_at, community_id (NOT NULL, default 'raelynn').
+    //    Streak badges are platform-level, but the column requires a value
+    //    so we use the fan's first followed community if known, else fall
+    //    back to the seed default. Idempotent on (fan_id, badge_slug).
     if (milestoneHit) {
+      // Try to use the fan's first followed community, fallback to 'raelynn'.
+      const { data: firstFollow } = await admin
+        .from("fan_artist_following")
+        .select("artist_slug")
+        .eq("fan_id", fanId)
+        .order("followed_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      const communityId =
+        (firstFollow?.artist_slug as string | undefined) ?? "raelynn";
+
       await admin
-        .from("earned_badges")
+        .from("fan_badges")
         .upsert(
           {
             fan_id: fanId,
             badge_slug: `streak-${milestoneHit}`,
             earned_at: today.toISOString(),
+            community_id: communityId,
           },
           { onConflict: "fan_id,badge_slug", ignoreDuplicates: true },
         );
