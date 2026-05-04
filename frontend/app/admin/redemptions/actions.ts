@@ -3,6 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminContext } from "@/lib/admin";
 import { redirect } from "next/navigation";
+import { notifyRedemptionFulfilled } from "@/lib/notifications/triggers/redemption-fulfilled";
 
 export async function markFulfilledAction(redemptionId: string, fulfillmentNote: string) {
   const ctx = await getAdminContext();
@@ -21,6 +22,27 @@ export async function markFulfilledAction(redemptionId: string, fulfillmentNote:
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Notify the fan. Best-effort; never block the action.
+  try {
+    const { data: redemption } = await supabase
+      .from("reward_redemptions")
+      .select("fan_id, rewards(name, artist_slug)")
+      .eq("id", redemptionId)
+      .maybeSingle();
+    if (redemption) {
+      const reward = (redemption as { rewards?: { name?: string; artist_slug?: string } }).rewards;
+      notifyRedemptionFulfilled({
+        fanId: redemption.fan_id as string,
+        redemptionId,
+        rewardName: reward?.name ?? "Your reward",
+        artistSlug: reward?.artist_slug,
+        fulfillmentNote: fulfillmentNote || undefined,
+      }).catch(() => {});
+    }
+  } catch {
+    /* no-op */
   }
 
   return { success: true };

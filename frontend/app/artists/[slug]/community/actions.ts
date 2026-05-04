@@ -8,6 +8,8 @@ import { getAdminUser } from "@/lib/admin";
 import { indexRowAsync } from "@/lib/embeddings";
 import { moderateRowAsync } from "@/lib/moderation";
 import { tagRowAsync } from "@/lib/tagging";
+import { notifyNewPost } from "@/lib/notifications/triggers/new-post";
+import { notifyCommentOnMyPost } from "@/lib/notifications/triggers/comment-on-my-post";
 
 type Visibility = "public" | "premium" | "founder-only";
 
@@ -67,6 +69,9 @@ export async function createPostAction(formData: FormData) {
   if (created) indexRowAsync("community_posts", created.id);
   if (created) moderateRowAsync("community_posts", created.id);
   if (created) tagRowAsync(created.id);
+  if (created) {
+    notifyNewPost({ postId: created.id, artistSlug, authorId: userId }).catch(() => {});
+  }
 
   revalidatePath(`/artists/${artistSlug}/community`);
   revalidatePath(`/artists/${artistSlug}`);
@@ -135,6 +140,14 @@ export async function addCommentAction(formData: FormData) {
 
   if (created) indexRowAsync("community_comments", created.id);
   if (created) moderateRowAsync("community_comments", created.id);
+  if (created) {
+    notifyCommentOnMyPost({
+      postId,
+      commentId: created.id,
+      commenterId: userId,
+      artistSlug,
+    }).catch(() => {});
+  }
 
   revalidatePath(`/artists/${artistSlug}/community`);
 }

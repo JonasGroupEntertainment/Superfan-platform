@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PushOptInBanner from "@/components/push-opt-in-banner";
 import StreakTile from "@/components/streak-tile";
 import type { FanHomeData, FanHomeUpcomingEvent } from "@/lib/data/fan-home";
 
@@ -69,6 +70,7 @@ export default function FanHomeDashboard({ data, streak }: { data: FanHomeData; 
       </header>
 
       {/* Followed artists strip */}
+      <PushOptInBanner />
       {streak && <StreakTile
         currentStreakDays={streak.currentStreakDays}
         longestStreakDays={streak.longestStreakDays}

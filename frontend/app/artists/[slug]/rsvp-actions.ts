@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { notifyRsvpConfirmation } from "@/lib/notifications/triggers/rsvp-confirmation";
 
 export async function toggleRsvpAction(formData: FormData) {
   const eventId = String(formData.get("event_id") ?? "").trim();
@@ -36,6 +37,9 @@ export async function toggleRsvpAction(formData: FormData) {
       .eq("fan_id", user.id);
   }
 
+  if (wantRsvp) {
+    notifyRsvpConfirmation({ fanId: user.id, eventId, artistSlug }).catch(() => {});
+  }
   revalidatePath(`/artists/${artistSlug}`);
   return { ok: true as const };
 }
