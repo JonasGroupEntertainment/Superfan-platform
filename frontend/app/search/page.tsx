@@ -15,6 +15,7 @@ import { search } from "@/lib/search";
 import { EmbeddingError } from "@/lib/embeddings";
 import type { SearchHit, SearchResults } from "@/lib/search";
 import SearchInput from "@/components/search-input";
+import { absoluteDate } from "@/lib/format/relative-time";
 
 export const dynamic = "force-dynamic";
 
@@ -184,7 +185,7 @@ function renderPost(h: SearchHit) {
       ) : null}
       <p className="mt-1 line-clamp-3 text-xs text-white/70">{h.data.body}</p>
       <p className="mt-2 text-[10px] uppercase tracking-wide text-white/40">
-        in {h.data.artist_slug} · {formatDate(h.data.created_at)}
+        in {h.data.artist_slug} · {absoluteDate(h.data.created_at)}
       </p>
     </Link>
   );
@@ -199,7 +200,7 @@ function renderComment(h: SearchHit) {
     >
       <p className="line-clamp-3 text-xs text-white/80">{h.data.body}</p>
       <p className="mt-2 text-[10px] uppercase tracking-wide text-white/40">
-        comment in {h.data.artist_slug} · {formatDate(h.data.created_at)}
+        comment in {h.data.artist_slug} · {absoluteDate(h.data.created_at)}
       </p>
     </Link>
   );
@@ -215,7 +216,7 @@ function renderEvent(h: SearchHit) {
       ) : null}
       <p className="mt-2 text-[10px] uppercase tracking-wide text-white/40">
         {h.data.artist_slug}
-        {h.data.event_date ? ` · ${formatDate(h.data.event_date)}` : ""}
+        {h.data.event_date ? ` · ${absoluteDate(h.data.event_date)}` : ""}
       </p>
     </Link>
   );
@@ -238,14 +239,4 @@ function renderReward(h: SearchHit) {
   );
 }
 
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
+
