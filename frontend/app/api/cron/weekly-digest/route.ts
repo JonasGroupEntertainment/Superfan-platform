@@ -78,9 +78,10 @@ export async function GET(request: Request) {
   try {
     const admin = createAdminClient();
 
+    const currentHourUtc = new Date().getUTCHours();
     const { data: candidates, error: listErr } = await admin.rpc(
-      "list_digest_recipients",
-      { p_limit: BATCH_SIZE },
+      "list_digest_recipients_at_hour",
+      { p_hour: currentHourUtc, p_limit: BATCH_SIZE },
     );
     if (listErr) {
       return NextResponse.json(
