@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import ImageUploader from "@/components/image-uploader";
 import VideoUploader from "@/components/video-uploader";
 import CaptionSuggester from "./caption-suggester";
+import TagSuggester from "@/components/community/tag-suggester";
 import { useFormSave, SaveStatusIndicator } from "@/lib/use-form-save";
 import {
   createAnnouncementAction,
@@ -203,6 +204,9 @@ export default function NewPostForm({
         className="w-full resize-none rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-white/40 focus:outline-none"
       />
       <input type="hidden" name="caption_used" value={captionUsed ? "1" : "0"} />
+
+      {/* AI #5 — TagSuggester (lights M-2 filter chips on submit) */}
+      <TagSuggester partialBody={body} artistSlug={artistSlug} />
 
       {kind === "poll" && (
         <div className="space-y-2">

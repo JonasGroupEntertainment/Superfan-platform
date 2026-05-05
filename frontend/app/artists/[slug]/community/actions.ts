@@ -37,6 +37,13 @@ function normalizeUrl(urlRaw: string): string | null {
 export async function createPostAction(formData: FormData) {
   const artistSlug = String(formData.get("artist_slug") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
+
+  // AI #5 — capture fan-selected tags from TagSuggester
+  const aiSuggestedTagsRaw = String(formData.get("ai_suggested_tags") ?? "");
+  const aiSuggestedTags = aiSuggestedTagsRaw
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => t.length > 0 && t.length <= 24);
   const imageUrlRaw = String(formData.get("image_url") ?? "").trim();
   const videoUrlRaw = String(formData.get("video_url") ?? "").trim();
   const videoPosterUrlRaw = String(formData.get("video_poster_url") ?? "").trim();
@@ -51,8 +58,7 @@ export async function createPostAction(formData: FormData) {
   const videoPosterUrl = normalizeUrl(videoPosterUrlRaw);
 
   const { data: created } = await supabase
-    .from("community_posts")
-    .insert({
+    .from("community_posts").insert({
       artist_slug: artistSlug,
       author_id: userId,
       kind: "post",
@@ -60,8 +66,7 @@ export async function createPostAction(formData: FormData) {
       image_url: imageUrl,
       video_url: videoUrl,
       video_poster_url: videoPosterUrl,
-      caption_used: captionUsed,
-    })
+      caption_used: captionUsed, tags: aiSuggestedTags.length > 0 ? aiSuggestedTags.slice(0, 6) : null})
     .select("id")
     .single();
 
