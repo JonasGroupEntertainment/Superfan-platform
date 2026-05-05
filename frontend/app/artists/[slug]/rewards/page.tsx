@@ -6,6 +6,8 @@ import Image from "next/image";
 import RewardCardWithForm from "./reward-card";
 import RecommendedRewardCard from "./recommended-reward-card";
 import { recommendReward } from "@/lib/recs";
+import { MarketplaceEmptyState, MIN_INVENTORY } from "@/components/marketplace-empty-state";
+
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +64,20 @@ export default async function RewardsPage({
       ? Promise.resolve(null)
       : recommendReward({ fanId: user.id, communityId: slug }),
   ]);
+
+  if (rewards.length < MIN_INVENTORY) {
+    return (
+      <div className="min-h-screen bg-midnight px-4 py-8">
+        <div className="mx-auto max-w-4xl">
+          <h1 className="text-3xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
+            Rewards · {artist.name}
+          </h1>
+          <p className="mt-2 mb-8 text-sm text-white/60">Spend your points on exclusive perks from {artist.name}.</p>
+          <MarketplaceEmptyState scopeName={artist.name} />
+        </div>
+      </div>
+    );
+  }
 
   const recentRedemptions = myRedemptions.slice(0, 5);
 

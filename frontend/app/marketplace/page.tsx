@@ -1,5 +1,7 @@
 import { getActiveOffers } from "@/lib/data/offers";
 import type { Offer } from "@/lib/data/types";
+import { MarketplaceEmptyState, MIN_INVENTORY } from "@/components/marketplace-empty-state";
+
 
 const tabs = ["Featured", "Merch", "Experiences", "Collectibles", "Fan-Exclusive"];
 
@@ -34,6 +36,15 @@ function formatCategory(cat: Offer["category"]): string {
 
 export default async function MarketplacePage() {
   const dbOffers = await getActiveOffers();
+  if (dbOffers.length < MIN_INVENTORY) {
+    return (
+      <div className="min-h-screen bg-midnight">
+        <main className="mx-auto max-w-6xl px-6 py-12">
+          <MarketplaceEmptyState />
+        </main>
+      </div>
+    );
+  }
   const usingDb = dbOffers.length > 0;
 
   const products = usingDb
