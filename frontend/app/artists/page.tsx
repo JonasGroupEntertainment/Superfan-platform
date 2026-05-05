@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listArtistsFromDb } from "@/lib/data/artists";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
   title: "Artists · Fan Engage",
@@ -9,6 +10,17 @@ export const dynamic = "force-dynamic";
 
 export default async function ArtistsIndexPage() {
   const artists = await listArtistsFromDb();
+
+  // Fan counts per community for social-proof display (M-14)
+  const admin = createAdminClient();
+  const { data: memberships } = await admin
+    .from("fan_community_memberships")
+    .select("community_id");
+  const fanCounts: Record<string, number> = {};
+  for (const m of (memberships ?? []) as Array<{ community_id: string }>) {
+    fanCounts[m.community_id] = (fanCounts[m.community_id] ?? 0) + 1;
+  }
+
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-6 py-12">
       <header className="space-y-2">
@@ -17,7 +29,7 @@ export default async function ArtistsIndexPage() {
           Fan clubs on Fan Engage
         </h1>
         <p className="max-w-2xl text-sm text-white/70">
-          Each artist has a dedicated hub with rewards, drops, and backstage access for their superfans.
+          Each artist has a dedicated hub with rewards, drops, and backstage access for their fans.
         </p>
       </header>
 
@@ -67,6 +79,13 @@ export default async function ArtistsIndexPage() {
               {a.genres.length > 0 && (
                 <p className="absolute left-5 top-5 rounded-full border border-white/15 bg-black/45 px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-white/85 backdrop-blur">
                   {a.genres.slice(0, 2).join(" · ")}{a.genres.length > 2 ? " +" + (a.genres.length - 2) : ""}
+                </p>
+              )}
+
+              {/* Top-right fan count chip (M-14) */}
+              {(fanCounts[a.slug] ?? 0) > 0 && (
+                <p className="absolute right-5 top-5 rounded-full border border-white/15 bg-black/45 px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-white/85 backdrop-blur">
+                  {fanCounts[a.slug].toLocaleString()} {fanCounts[a.slug] === 1 ? "fan" : "fans"}
                 </p>
               )}
 
