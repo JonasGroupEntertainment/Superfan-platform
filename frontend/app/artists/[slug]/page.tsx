@@ -219,7 +219,7 @@ export default async function ArtistPage({
             href={`/artists/${slug}/founders`}
             className="inline-flex items-center gap-2 text-sm font-medium text-white/80 hover:text-white transition"
           >
-            👑 See the {founderData!.count} Founding Fans →
+            👑 See the {founderData!.count} Founding {(founderData?.count ?? 0) === 1 ? "Fan" : "Fans"} →
           </Link>
         </section>
       )}
