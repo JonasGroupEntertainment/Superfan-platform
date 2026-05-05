@@ -146,6 +146,13 @@ export default function PredictionCard({
         <p className="mt-1 text-sm text-white/75">{post.body}</p>
       )}
 
+      {phase === "resolved" && viewerOptionId && viewerOptionId === post.correct_option_id && (
+        <div className="mt-3 flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3 py-2 text-sm font-semibold text-emerald-200">
+          <span aria-hidden>🎉</span>
+          <span>You called it!{post.points_for_correct ? " +" + post.points_for_correct + " pts awarded." : ""}</span>
+        </div>
+      )}
+
       <ul className="mt-4 space-y-2">
         {options.map((opt) => {
           const isCorrect =
