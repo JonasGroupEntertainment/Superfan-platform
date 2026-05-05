@@ -32,6 +32,8 @@ async function buildInviteUrl(code: string | null | undefined): Promise<string> 
   return `${origin}/invite/${code}`;
 }
 
+export const metadata = { title: "Referrals · Fan Engage" };
+
 export default async function ReferralsPage() {
   const [fan, myReferrals, leaderboard] = await Promise.all([
     getCurrentFan(),

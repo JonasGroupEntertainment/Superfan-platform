@@ -34,6 +34,8 @@ function formatCategory(cat: Offer["category"]): string {
   }[cat];
 }
 
+export const metadata = { title: "Marketplace · Fan Engage" };
+
 export default async function MarketplacePage() {
   const dbOffers = await getActiveOffers();
   if (dbOffers.length < MIN_INVENTORY) {
