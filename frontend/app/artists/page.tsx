@@ -8,8 +8,16 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function ArtistsIndexPage() {
+export default async function ArtistsIndexPage({ searchParams }: { searchParams?: Promise<{ genre?: string }> }) {
+  const sp = (await searchParams) ?? {};
+  const genreFilter = (sp.genre ?? null) as string | null;
+
   const artists = await listArtistsFromDb();
+  const allGenres = Array.from(new Set(artists.flatMap((a) => a.genres))).sort();
+  const filteredArtists = genreFilter
+    ? artists.filter((a) => a.genres.includes(genreFilter))
+    : artists;
+
 
   // Fan counts per community for social-proof display (M-14)
   const admin = createAdminClient();
@@ -33,8 +41,39 @@ export default async function ArtistsIndexPage() {
         </p>
       </header>
 
+      
+      {allGenres.length > 0 && (
+        <div className="flex flex-wrap gap-2" aria-label="Filter by genre">
+          <a
+            href="/artists"
+            className={
+              "inline-flex items-center rounded-full border px-3 py-1 text-xs transition " +
+              (genreFilter === null
+                ? "border-white/40 bg-white/15 text-white"
+                : "border-white/10 bg-black/30 text-white/70 hover:border-white/30")
+            }
+          >
+            All
+          </a>
+          {allGenres.map((g) => (
+            <a
+              key={g}
+              href={`/artists?genre=${encodeURIComponent(g)}`}
+              className={
+                "inline-flex items-center rounded-full border px-3 py-1 text-xs transition " +
+                (genreFilter === g
+                  ? "border-white/40 bg-white/15 text-white"
+                  : "border-white/10 bg-black/30 text-white/70 hover:border-white/30")
+              }
+            >
+              {g}
+            </a>
+          ))}
+        </div>
+      )}
+
       <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {artists.map((a) => (
+        {filteredArtists.map((a) => (
           <Link
             key={a.slug}
             href={`/artists/${a.slug}`}
