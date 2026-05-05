@@ -43,6 +43,10 @@
     {
       "path": "/api/cron/compute-optimal-hours",
       "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/thread-summary-backfill",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
