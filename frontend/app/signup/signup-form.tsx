@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const community = searchParams.get("community");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "confirm">("idle");
@@ -55,6 +57,12 @@ export function SignupForm() {
           <p className="text-sm text-white/70">
             Create an account to earn points, unlock rewards, and get backstage access.
           </p>
+          {community && (
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-aurora/40 bg-aurora/10 px-3 py-1 text-xs text-aurora">
+              <span aria-hidden>·</span>
+              <span>Joining via @{community}</span>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
