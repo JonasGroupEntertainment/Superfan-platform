@@ -7,8 +7,8 @@ const tabs = ["Featured", "Merch", "Experiences", "Collectibles", "Fan-Exclusive
 
 // Static preview content used when Supabase has no offers yet.
 const fallbackProducts = [
-  { title: "Signed World Tour Hoodie", tier: "Silver Priority", pts: "3,400 pts", category: "Merch", badge: "Limited" },
-  { title: "Backstage Polaroid Pack", tier: "Gold Exclusive", pts: "5,200 pts", category: "Featured", badge: "Drop" },
+  { title: "Signed World Tour Hoodie", tier: "Silver", pts: "3,400 pts", category: "Merch", badge: "Limited" },
+  { title: "Backstage Polaroid Pack", tier: "Gold", pts: "5,200 pts", category: "Featured", badge: "Drop" },
   { title: "VIP Soundcheck + Meet", tier: "Platinum", pts: "9,800 pts", category: "Experiences", badge: "New" },
   { title: "Handwritten Lyric Sheet", tier: "Gold", pts: "4,750 pts", category: "Collectibles", badge: "1/50" },
   { title: "Fan-Exclusive Vinyl Variant", tier: "All tiers", pts: "$45", category: "Fan-Exclusive", badge: "Preorder" },
