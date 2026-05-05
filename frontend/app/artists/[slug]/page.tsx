@@ -34,7 +34,7 @@ const HERO_FOCAL_Y_BY_SLUG: Record<string, number> = {
   // New hero photo (lake + cabins) places RaeLynn low in the frame.
   // 55 = midpoint between the default 30 (head too low) and 75 (head
   // cropped at top). Adjust by ~5 if you want more or less headroom.
-  "raelynn": 55,
+  "raelynn": 30,
 };
 const DEFAULT_HERO_FOCAL_Y = 30;
 
