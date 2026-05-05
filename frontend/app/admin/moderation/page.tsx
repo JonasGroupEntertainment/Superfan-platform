@@ -22,6 +22,7 @@ interface QueueRow {
   self_harm: boolean;
   classified_at: string | null;
   created_at: string;
+  duplicate_of: string | null,
 }
 
 const SEVERITY_LABEL: Record<number, string> = {
@@ -55,7 +56,7 @@ export default async function AdminModerationPage() {
     admin
       .from("community_posts")
       .select(
-        "id, artist_slug, body, title, moderation_status, moderation_severity, moderation_categories, moderation_reason, moderation_self_harm, moderation_classified_at, created_at",
+        "id, artist_slug, body, title, moderation_status, moderation_severity, moderation_categories, moderation_reason, moderation_self_harm, moderation_classified_at, created_at, duplicate_of",
       )
       .in("moderation_status", ["flag_review", "auto_hide"])
       .order("moderation_classified_at", { ascending: false, nullsFirst: false })
@@ -83,6 +84,7 @@ export default async function AdminModerationPage() {
     self_harm: Boolean(p.moderation_self_harm),
     classified_at: (p.moderation_classified_at as string | null) ?? null,
     created_at: p.created_at as string,
+    duplicate_of: ((p as { duplicate_of?: string | null }).duplicate_of) ?? null,
   }));
 
   const comments: QueueRow[] = (commentsRes.data ?? []).map((c) => {
@@ -102,6 +104,7 @@ export default async function AdminModerationPage() {
       self_harm: Boolean(c.moderation_self_harm),
       classified_at: (c.moderation_classified_at as string | null) ?? null,
       created_at: c.created_at as string,
+      duplicate_of: ((c as { duplicate_of?: string | null }).duplicate_of) ?? null,
     };
   });
 
@@ -145,7 +148,7 @@ export default async function AdminModerationPage() {
           <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-white/80">
             Total: {counts.total}
           </span>
-          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-amber-200">
+      <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-amber-200">
             Flag review: {counts.flag_review}
           </span>
           <span className="rounded-full border border-red-400/40 bg-red-400/10 px-3 py-1 text-red-200">
@@ -193,6 +196,7 @@ function QueueCard({ row }: { row: QueueRow }) {
             <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 uppercase tracking-wide text-white/70">
               {row.community_id}
             </span>
+            {row.duplicate_of ? <DuplicateChip targetId={row.duplicate_of} /> : null}
             <span
               className={`rounded-full border px-2 py-0.5 uppercase tracking-wide ${sevTone}`}
             >
@@ -288,5 +292,19 @@ function QueueCard({ row }: { row: QueueRow }) {
         </div>
       </div>
     </li>
+  );
+}
+
+// AI #20: warning chip rendered when a community post is suspected to
+// duplicate another. Kept inside this file to keep the page change tight.
+function DuplicateChip({ targetId }: { targetId: string }) {
+  return (
+    <span
+      title={`Likely duplicate of post ${targetId}`}
+      className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-amber-300"
+    >
+      <span aria-hidden>⚠</span>
+      Likely duplicate
+    </span>
   );
 }

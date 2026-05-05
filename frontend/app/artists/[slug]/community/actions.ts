@@ -11,6 +11,7 @@ import { tagRowAsync } from "@/lib/tagging";
 import { notifyNewPost } from "@/lib/notifications/triggers/new-post";
 import { notifyCommentOnMyPost } from "@/lib/notifications/triggers/comment-on-my-post";
 
+import { findNearestPost, isHardDuplicate } from "@/lib/dedup/check";
 type Visibility = "public" | "premium" | "founder-only";
 
 async function requireUser() {
@@ -66,6 +67,21 @@ export async function createPostAction(formData: FormData) {
 
   // Fire-and-forget — embedding lands within seconds, backfill cron is the
   // safety net if this path fails.
+  // AI #20: dedupe — does this post nearly duplicate an existing one?
+  if (created) {
+    try {
+      const dup = await findNearestPost(body, created.id);
+      if (dup) {
+        const updates: Record<string, unknown> = { duplicate_of: dup.postId };
+        if (isHardDuplicate(dup)) {
+          updates.moderation_status = "flag_review";
+        }
+        await createAdminClient().from("community_posts").update(updates).eq("id", created.id);
+      }
+    } catch (e) {
+      console.warn("[ai20] dedupe check failed", e);
+    }
+  }
   if (created) indexRowAsync("community_posts", created.id);
   if (created) moderateRowAsync("community_posts", created.id);
   if (created) tagRowAsync(created.id);
@@ -204,6 +220,7 @@ export async function createPollAction(formData: FormData) {
     .select("id")
     .single();
   if (!post) return;
+
 
   indexRowAsync("community_posts", post.id);
   moderateRowAsync("community_posts", post.id);
