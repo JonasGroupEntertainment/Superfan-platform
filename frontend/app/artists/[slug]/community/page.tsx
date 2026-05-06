@@ -19,6 +19,7 @@ import FanCtaBlock from "./fan-cta-block";
 import NewPostForm from "./new-post-form";
 import PostCard from "./post-card";
 import TagFilterChips from "./tag-filter-chips";
+import PickedForYou from "@/components/personal/picked-for-you";
 
 export async function generateStaticParams() {
   return listArtists().map((a) => ({ slug: a.slug }));
@@ -80,6 +81,10 @@ export default async function ArtistCommunityPage({
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-6 py-10">
+
+      {fan?.id && (
+        <PickedForYou fanId={fan.id} artistSlug={slug} />
+      )}
       <section
         className="rounded-3xl border border-white/10 p-8"
         style={{ backgroundImage: heroGradient }}
