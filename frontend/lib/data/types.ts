@@ -65,6 +65,8 @@ export interface Offer {
   inventory: number | null;
   image_url: string | null;
   image_alt: string | null;
+  moderation_status: string | null;
+  moderation_user_message: string | null;
   active: boolean;
 }
 
@@ -118,6 +120,8 @@ export interface CommunityPost {
   video_poster_url: string | null;
   image_url: string | null;
   image_alt: string | null;
+  moderation_status: string | null;
+  moderation_user_message: string | null;
   pinned: boolean;
   visibility: CommunityPostVisibility;
   created_at: string;
@@ -160,5 +164,7 @@ export interface ChallengeEntry {
   body: string | null;
   image_url: string | null;
   image_alt: string | null;
+  moderation_status: string | null;
+  moderation_user_message: string | null;
   created_at: string;
 }
