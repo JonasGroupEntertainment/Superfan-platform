@@ -4,6 +4,7 @@ import { getMyReferrals, getReferralLeaderboard } from "@/lib/data/referrals";
 import InviteQRCode from "@/components/invite-qr";
 import CopyLinkButton from "./copy-link-button";
 import NativeShareButton from "./native-share-button";
+import PreviewSignupBanner from "@/components/preview-signup-banner";
 
 const ladder = [
   { level: "1 referral", reward: "+150 pts" },
@@ -58,6 +59,21 @@ export default async function ReferralsPage() {
     <div className="min-h-screen bg-midnight">
       <main className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 lg:flex-row">
         <div className="flex-1 space-y-6">
+          {!isSignedIn && (
+            <PreviewSignupBanner
+              eyebrow="🎟️ Preview"
+              headline="Sign up to get your invite link"
+              body="Members earn 150 bonus points every time a friend joins. Hit milestones and the rewards stack: signed postcards at 3 referrals, exclusive merch at 5, VIP livestream access at 10."
+              bullets={[
+                "+150 pts every verified signup",
+                "Milestones unlock real merch and experiences",
+                "Top referrers get featured in the public leaderboard",
+              ]}
+              primaryCta="Sign up free →"
+              nextPath="/referrals"
+            />
+          )}
+
           <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-purple-800/30 via-slate-900 to-midnight p-6 shadow-glass">
             <p className="text-sm uppercase tracking-wide text-white/60">Referrals</p>
             <h1 className="mt-2 text-3xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
@@ -66,13 +82,15 @@ export default async function ReferralsPage() {
             <p className="mt-4 text-sm text-white/70">
               {isSignedIn
                 ? `You've invited ${myCount} fan${myCount === 1 ? "" : "s"} so far. Keep sharing to climb the ladder.`
-                : "Share your personal link to earn bonus points, badges, and early access rewards every time a friend joins."}
+                : "Members get a personal invite link. Share it and earn bonus points, badges, and early access rewards every time a friend joins."}
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <code className="flex-1 rounded-2xl bg-black/40 px-4 py-3 text-sm">{inviteUrl}</code>
-              <CopyLinkButton url={inviteUrl} />
-              <NativeShareButton url={inviteUrl} />
-            </div>
+            {isSignedIn && (
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <code className="flex-1 rounded-2xl bg-black/40 px-4 py-3 text-sm">{inviteUrl}</code>
+                <CopyLinkButton url={inviteUrl} />
+                <NativeShareButton url={inviteUrl} />
+              </div>
+            )}
           </section>
 
           <section className="grid gap-6 md:grid-cols-2">
@@ -131,18 +149,20 @@ export default async function ReferralsPage() {
         </div>
 
         <aside className="w-full max-w-sm space-y-6">
-          <section className="glass-card p-6">
-            <p className="text-sm uppercase tracking-wide text-white/60">QR invite</p>
-            <div className="mt-4">
-              <InviteQRCode url={inviteUrl} />
-            </div>
-            <p className="mt-3 text-xs text-white/60">
-              Scan to join via {possessive} invite.
-            </p>
-            <code className="mt-2 block break-all rounded-xl bg-black/30 px-3 py-2 text-center text-[11px] text-white/60">
-              {inviteUrl}
-            </code>
-          </section>
+          {isSignedIn && (
+            <section className="glass-card p-6">
+              <p className="text-sm uppercase tracking-wide text-white/60">QR invite</p>
+              <div className="mt-4">
+                <InviteQRCode url={inviteUrl} />
+              </div>
+              <p className="mt-3 text-xs text-white/60">
+                Scan to join via {possessive} invite.
+              </p>
+              <code className="mt-2 block break-all rounded-xl bg-black/30 px-3 py-2 text-center text-[11px] text-white/60">
+                {inviteUrl}
+              </code>
+            </section>
+          )}
 
           <section className="glass-card p-6">
             <p className="text-sm uppercase tracking-wide text-white/60">Recent activity</p>

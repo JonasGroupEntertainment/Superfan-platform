@@ -1,11 +1,15 @@
+import Link from "next/link";
 import { getActiveOffers } from "@/lib/data/offers";
+import { getCurrentFan } from "@/lib/data/fan";
 import type { Offer } from "@/lib/data/types";
 import { MarketplaceEmptyState, MIN_INVENTORY } from "@/components/marketplace-empty-state";
+import PreviewSignupBanner from "@/components/preview-signup-banner";
 
 
 const tabs = ["Featured", "Merch", "Experiences", "Collectibles", "Fan-Exclusive"];
 
-// Static preview content used when Supabase has no offers yet.
+// Static preview content used when Supabase has no offers yet, OR for
+// anonymous visitors so the marketplace marketing page has visual weight.
 const fallbackProducts = [
   { title: "Signed World Tour Hoodie", tier: "Silver", pts: "3,400 pts", category: "Merch", badge: "Limited" },
   { title: "Backstage Polaroid Pack", tier: "Gold", pts: "5,200 pts", category: "Featured", badge: "Drop" },
@@ -37,8 +41,14 @@ function formatCategory(cat: Offer["category"]): string {
 export const metadata = { title: "Marketplace · Fan Engage" };
 
 export default async function MarketplacePage() {
-  const dbOffers = await getActiveOffers();
-  if (dbOffers.length < MIN_INVENTORY) {
+  const [dbOffers, fan] = await Promise.all([getActiveOffers(), getCurrentFan()]);
+  const isSignedIn = fan !== null;
+  const usingDb = dbOffers.length >= MIN_INVENTORY;
+
+  // Signed-in users with a sparse DB get the empty-state component as before.
+  // Anonymous visitors and signed-in users with a populated DB fall through
+  // to the rendered marketplace (with fallback products if DB is sparse).
+  if (isSignedIn && !usingDb) {
     return (
       <div className="min-h-screen bg-midnight">
         <main className="mx-auto max-w-6xl px-6 py-12">
@@ -47,7 +57,6 @@ export default async function MarketplacePage() {
       </div>
     );
   }
-  const usingDb = dbOffers.length > 0;
 
   const products = usingDb
     ? dbOffers.map((o) => ({
@@ -64,6 +73,21 @@ export default async function MarketplacePage() {
     <div className="min-h-screen bg-midnight">
       <main className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 lg:flex-row">
         <div className="flex-1 space-y-6">
+          {!isSignedIn && (
+            <PreviewSignupBanner
+              eyebrow="🎟️ Preview"
+              headline="Sign up to redeem these drops"
+              body="Members earn points by showing up — events, posts, referrals — then trade them for the merch, experiences, and collectibles below. Drops are tier-locked so the people who care the most get first crack."
+              bullets={[
+                "Real merch + experiences from your favorite artists",
+                "Points-only or fan-priority pricing",
+                "Tier-locked so casual visitors don't outbid superfans",
+              ]}
+              primaryCta="Sign up to redeem →"
+              nextPath="/marketplace"
+            />
+          )}
+
           <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-purple-800/30 via-slate-900 to-midnight p-6 shadow-glass">
             <p className="text-sm uppercase tracking-wide text-white/60">Marketplace</p>
             <h1 className="mt-2 text-3xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
@@ -101,9 +125,18 @@ export default async function MarketplacePage() {
                 <p className="mt-2 text-sm text-white/70">Category · {item.category}</p>
                 <div className="mt-6 flex items-center justify-between">
                   <span className="text-lg font-semibold text-emerald-300">{item.pts}</span>
-                  <button className="rounded-full border border-white/30 px-4 py-2 text-sm text-white/80">
-                    Redeem
-                  </button>
+                  {isSignedIn ? (
+                    <button className="rounded-full border border-white/30 px-4 py-2 text-sm text-white/80">
+                      Redeem
+                    </button>
+                  ) : (
+                    <Link
+                      href="/signup?next=/marketplace"
+                      className="rounded-full bg-gradient-to-r from-aurora to-ember px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+                    >
+                      Sign up to redeem
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}
