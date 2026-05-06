@@ -4,6 +4,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
   title: "Artists · Fan Engage",
+  description:
+    "Browse artist fan clubs on Fan Engage and discover rewards, drops, events, and member-only experiences. Follow the artists you love.",
+  alternates: { canonical: "/artists" },
+  openGraph: {
+    type: "website",
+    url: "/artists",
+    siteName: "Fan Engage",
+    title: "Artist fan clubs · Fan Engage",
+    description:
+      "Follow artists, earn points, and unlock drops on every fan club hosted by Fan Engage.",
+  },
 };
 
 export const dynamic = "force-dynamic";

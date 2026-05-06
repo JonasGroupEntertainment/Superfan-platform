@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSyncExternalStore, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const STORAGE_KEY = "fanengage_cookie_consent";
 
@@ -25,7 +26,17 @@ function getServerSnapshot(): string | null {
 export default function CookieBanner() {
   const stored = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [dismissed, setDismissed] = useState(false);
-  const shown = stored === null && !dismissed;
+  const pathname = usePathname() ?? "";
+
+  // Don't compete with primary CTAs on form-heavy routes. The banner is
+  // anchored at the bottom of the viewport on mobile (full-width, ~140-180px
+  // tall) and was covering the Submit button on /for-artists/apply when
+  // scrolled to the end of the form. Suppress on these routes; banner still
+  // fires on every other page so consent capture isn't lost permanently.
+  const HIDE_ON = ["/for-artists/apply", "/signup", "/login"];
+  const hiddenForRoute = HIDE_ON.some((prefix) => pathname.startsWith(prefix));
+
+  const shown = stored === null && !dismissed && !hiddenForRoute;
 
   function save(choice: "accept" | "decline") {
     try {

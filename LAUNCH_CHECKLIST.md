@@ -1241,3 +1241,41 @@ Recorded for the paper trail:
 - Phase 7 — Save reliability (useFormSave + retry-on-503 + visible status across primary admin write surfaces)
 - Phase 8 — Fan Home discovery polish (top-3 upcoming events from any followed artist regardless of RSVP, Recent Activity kind chips + body fallback so non-titled posts surface, admin events list gained per-row ✏️ Edit with full inline form including active toggle)
 - Phase 9 — Signup unblock (migration 0023 — patched legacy `award_badge(uuid, text)` to delegate to `award_community_badge` so the ON CONFLICT target matches the post-0011 3-column PK on `fan_badges`; every signup since 0011 had been silently 500-ing with "Database error saving new user" and rolling back the auth.users insert). Also added a `COLLABORATING.md` onboarding guide for new engineers.
+
+---
+
+## 🧪 Pre-launch QA test plan (from Carla/Manus audit, 2026-05-06)
+
+Run through this end-to-end before flipping the production switch on the next round of artist outreach. Each item should pass with screenshot or short note in the launch QA log.
+
+- [ ] **Build** — `npm run build` completes without errors
+- [ ] **Lint/type** — `npm run typecheck` clean
+- [ ] **Artist application Step 1** — submit with valid data, confirmation message renders, application appears in `/admin/applications`
+- [ ] **Validation** — submit empty required fields; clear inline messages appear without losing entered data
+- [ ] **Keyboard navigation** — tab through `/for-artists/apply` end-to-end, focus order logical, no traps
+- [ ] **Mobile apply (≤390px wide)** — Submit CTA visible and clickable; cookie banner does not cover it
+- [ ] **Metadata** — view-source on `/`, `/for-artists`, `/for-artists/apply`, `/artists` — each title and description is unique
+- [ ] **Legal pages** — `/privacy`, `/terms`, `/cookie-policy` either show finalized copy OR a "policy being finalized" holding state with `support@fanengage.app` contact and `noindex` (pending George's legal handoff)
+- [ ] **Artist directory alt text** — inspect `/artists` images; meaningful artist images include descriptive alt text
+- [ ] **CTA flow** — click "Apply to launch your fan club" on `/for-artists` lands on `/for-artists/apply`
+- [ ] **OG previews** — paste each priority URL into Slack or LinkedIn debugger; preview matches page intent (artist acquisition vs fan-side discovery)
+
+## ♿ Accessibility pass — deferred to post-launch
+
+Real but non-blocking gaps surfaced in the Carla/Manus audit:
+
+- [ ] **Artist directory image alt text** — `<img alt="...">` on `/artists` cards should describe the artist, not be empty/decorative
+- [ ] **Form error → control linking** — wire `aria-describedby` from helper/error text to inputs on `/for-artists/apply`, `/admin/<slug>/setup`
+- [ ] **Required-field affordance** — visible asterisk + screen-reader hint pattern across all `required` inputs
+- [ ] **Heading hierarchy audit** — confirm one H1 per page across artist-acquisition and admin routes
+- [ ] **Decorative icon `aria-hidden`** — Lucide icons used for visual flourish should be hidden from screen readers
+- [ ] **Cookie banner / install prompt focus order** — verify banner is reachable via tab and dismissible via Enter/Space
+
+Form already has `<fieldset>`+`<legend>`, `htmlFor` labels, and basic accessible markup; nothing is critically broken. These are quality-of-platform items, not launch blockers.
+
+## 📝 Form-trim decision pending
+
+Carla/Manus recommended capping the artist application Step 1 at ≤7 fields with an optional Step 2 for qualification details. Current `/for-artists/apply` has 25+ visible fields across 5 sections.
+
+**Decision deferred:** Kevin to confirm whether to ship Step 1/Step 2 split now (conversion lift, ~1 day of work) or hold until after the legal pages land. The application pipeline (F.1.A) and onboarding wizard (G.5) already separate "apply" from "set up your hub" — a Step 1/Step 2 split would just trim the public-facing form length.
+

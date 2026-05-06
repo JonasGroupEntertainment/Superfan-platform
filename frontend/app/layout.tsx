@@ -28,18 +28,18 @@ const appUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: {
-    default: "Fan Engage — your front-row seat",
+    default: "Fan Engage — turn casual fans into real superfans",
     template: "%s · Fan Engage",
   },
   description:
-    "The superfan platform. Follow artists, earn points for every fan move, and unlock real drops — signed vinyl, backstage access, listening parties.",
+    "The superfan platform. Follow the artists, performers, and creators you love, earn points for every fan move, and unlock real drops, members-only events, and behind-the-scenes access.",
   applicationName: "Fan Engage",
   keywords: [
     "superfan",
     "fan club",
     "artist community",
     "fan rewards",
-    "listening party",
+    "members-only events",
     "VIP access",
   ],
   manifest: "/manifest.json",
@@ -49,15 +49,15 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     siteName: "Fan Engage",
-    title: "Fan Engage — your front-row seat",
+    title: "Fan Engage — turn casual fans into real superfans",
     description:
-      "Follow artists, earn points, unlock real drops. The superfan platform built for fans who actually show up.",
+      "Follow artists, earn points, unlock real drops. The superfan platform built for fans who actually show up — for music, performers, comedians, podcasts, and more.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fan Engage — your front-row seat",
+    title: "Fan Engage — turn casual fans into real superfans",
     description:
-      "Follow artists, earn points, unlock real drops. Built for the fans who actually show up.",
+      "Follow the artists, performers, and creators you love. Earn points, unlock drops, show up.",
   },
   appleWebApp: {
     capable: true,
