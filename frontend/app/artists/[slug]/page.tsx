@@ -15,6 +15,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import PremiumPaywall from "@/components/premium-paywall";
 import SocialIcon from "@/components/social-icon";
 import FollowButton from "./follow-button";
+import ShareButton from "@/components/share-button";
 import RsvpButton from "./rsvp-button";
 
 
@@ -191,6 +192,13 @@ export default async function ArtistPage({
             {isSignedIn && (
               <FollowButton artistSlug={artist.slug} initialFollowing={isFollowing} />
             )}
+            <ShareButton
+              title={`Check out ${artist.name} on Fan Engage`}
+              text={`${artist.name} — ${artist.tagline ?? "fan club on Fan Engage"}`}
+              url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app"}/artists/${artist.slug}`}
+              label="Share"
+              variant="ghost"
+            />
             <Link
               href={`/artists/${slug}/community`}
               className="rounded-full border border-white/30 bg-black/30 px-6 py-3 text-sm font-medium text-white/90 backdrop-blur hover:bg-white/10"
