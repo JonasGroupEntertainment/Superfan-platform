@@ -14,6 +14,7 @@ import { getUnreadCount } from "@/lib/data/notifications";
 import { getCurrentCommunityId } from "@/lib/community";
 import { getEntitlement } from "@/lib/entitlements";
 import { getAdminContext } from "@/lib/admin";
+import { getFanHandle } from "@/lib/data/fan-profile";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
 const spaceGrotesk = Space_Grotesk({
@@ -94,11 +95,13 @@ async function getCurrentUserSafe() {
       .select("first_name, avatar_url")
       .eq("id", data.user.id)
       .maybeSingle();
+    const handle = await getFanHandle(data.user.id).catch(() => null);
     return {
       id: data.user.id,
       email: data.user.email,
       first_name: (fan?.first_name as string | null) ?? null,
       avatar_url: (fan?.avatar_url as string | null) ?? null,
+      handle,
     };
   } catch {
     return null;

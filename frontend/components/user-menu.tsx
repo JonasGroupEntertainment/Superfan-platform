@@ -9,6 +9,7 @@ interface UserMenuProps {
     email: string | null | undefined;
     first_name: string | null;
     avatar_url: string | null;
+    handle: string | null;
   } | null;
   isAdmin: boolean;
   unreadCount?: number;
@@ -111,7 +112,19 @@ export default function UserMenu({ fan, isAdmin, unreadCount = 0 }: UserMenuProp
               Fan home
             </Link>
 
-            {/* My Rewards */}
+            {/* My Profile */}
+            {fan.handle && (
+              <Link
+                href={`/fans/${fan.handle}`}
+                className="block px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition"
+                role="menuitem"
+                onClick={() => setIsOpen(false)}
+              >
+                My profile
+              </Link>
+            )}
+
+                        {/* My Rewards */}
             <Link
               href="/rewards"
               className="block px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition"

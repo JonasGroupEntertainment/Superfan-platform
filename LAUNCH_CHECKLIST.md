@@ -33,6 +33,7 @@ Last updated: April 26, 2026 — **Signup unblocked** (migration 0023 patches `a
 | 0021 | `0021_rewards_redemption.sql` | rewards_catalog + reward_redemptions tables + redeem_reward() RPC + 4 seeded rewards | ✅ applied |
 | 0022 | `0022_community_videos.sql` | video_url + video_poster_url columns + community-videos bucket | ✅ applied |
 | 0023 | `0023_fix_award_badge_delegate.sql` | Patch award_badge(uuid, text) — delegates to award_community_badge to fix 42P10 ON CONFLICT mismatch that was rejecting every signup since 0011 | ✅ applied |
+| 0034 | `0034_fan_profile_handle.sql` | Public fan profile handles + public_profile_enabled flag, backfill, unique index, signup trigger | ⏳ apply via Supabase SQL editor |
 
 **How to apply:** Supabase dashboard → SQL Editor → paste raw file contents from <https://github.com/KevinJonasSr/Superfan-platform/tree/main/supabase/migrations> → Run. Confirm the "destructive operations" dialog when it appears (it's always just `drop policy if exists` / `drop trigger if exists` being safely idempotent).
 
@@ -1278,4 +1279,15 @@ Form already has `<fieldset>`+`<legend>`, `htmlFor` labels, and basic accessible
 Carla/Manus recommended capping the artist application Step 1 at ≤7 fields with an optional Step 2 for qualification details. Current `/for-artists/apply` has 25+ visible fields across 5 sections.
 
 **Decision deferred:** Kevin to confirm whether to ship Step 1/Step 2 split now (conversion lift, ~1 day of work) or hold until after the legal pages land. The application pipeline (F.1.A) and onboarding wizard (G.5) already separate "apply" from "set up your hub" — a Step 1/Step 2 split would just trim the public-facing form length.
+
+## 👤 Public fan profile — deferred items
+
+Migration 0034 + /fans/<handle> route shipped 2026-05-06. The following are deferred to a follow-on bundle:
+
+- [ ] **/me/profile settings page** — let fans customize their handle (currently auto-generated as `firstname-XXXX`) and toggle `public_profile_enabled`. v1 uses the default true and a fan must update DB directly to opt out.
+- [ ] **Handle uniqueness conflict UX** — when a fan picks a taken handle in the eventual settings page, surface a clean error + suggestions.
+- [ ] **Reserved handle list** — block `admin`, `support`, `api`, `auth`, `rewards`, etc. before opening up custom handle picking.
+- [ ] **Friend-of-friend visibility** — surface "Sarah (@sarah-7f3a) just claimed Founder #28 for RaeLynn" in the inbox of fans who follow Sarah.
+- [ ] **Activity feed on profile** — chronological feed of public events on the fan's profile (badges earned, founder claims, drops won) the way GitHub profiles surface activity.
+- [ ] **Profile share auto-prompt** — when a fan earns their first badge or claims a founder slot, surface a one-time toast: "Your profile is live at fan-engage.com/fans/<handle> — share it?"
 
