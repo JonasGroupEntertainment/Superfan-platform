@@ -90,13 +90,31 @@ export async function GET(request: Request) {
       );
     }
 
-    const recipients = (candidates ?? []) as Array<{
+    let recipients = (candidates ?? []) as Array<{
       fan_id: string;
       email: string;
       first_name: string | null;
       total_points: number;
       current_tier: string;
     }>;
+
+    // Test-mode: filter to a single email so manual smoke tests don't
+    // blast the whole audience. Pass ?testEmail=you@example.com along
+    // with the Bearer auth header. The fan must already be in the
+    // candidate set (i.e., opted-in, not suspended, last digest >6 days
+    // old) — if they aren't, the cron returns totalCandidates=0.
+    const url = new URL(request.url);
+    const testEmail = url.searchParams.get("testEmail");
+    if (testEmail) {
+      const before = recipients.length;
+      recipients = recipients.filter(
+        (r) => r.email.toLowerCase() === testEmail.toLowerCase(),
+      );
+      console.log(
+        `[cron weekly-digest] testEmail=${testEmail} filter: ${before} -> ${recipients.length}`,
+      );
+    }
+
     summary.totalCandidates = recipients.length;
 
     // Process sequentially. Per-fan latency is gather (50-200ms) +

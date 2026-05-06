@@ -122,6 +122,39 @@ export async function broadcastSms(params: {
 }
 
 /**
+ * Best-effort cleanup of a draft Mailchimp campaign. Used when content
+ * upload or send fails partway through broadcastEmail() so we don't
+ * leave stranded drafts in the dashboard. Failures here are logged and
+ * swallowed — the original error is what matters to the caller.
+ */
+async function deleteMailchimpCampaign(
+  base: string,
+  authHeader: string,
+  campaignId: string,
+): Promise<void> {
+  try {
+    const res = await fetch(`${base}/campaigns/${campaignId}`, {
+      method: "DELETE",
+      headers: { Authorization: authHeader },
+    });
+    if (!res.ok) {
+      console.warn(
+        "broadcastEmail: cleanup DELETE returned",
+        res.status,
+        "for campaign",
+        campaignId,
+      );
+    }
+  } catch (err) {
+    console.warn(
+      "broadcastEmail: cleanup DELETE threw for campaign",
+      campaignId,
+      err,
+    );
+  }
+}
+
+/**
  * Send an email blast via Mailchimp Campaigns API — creates a one-off
  * regular campaign against the configured audience, sets plain-text + html
  * content, and fires it immediately.
@@ -196,6 +229,7 @@ export async function broadcastEmail(params: {
     });
     if (!contentRes.ok) {
       const detail = await contentRes.json().catch(() => ({}));
+      await deleteMailchimpCampaign(base, authHeader, campaignId);
       return { ...result, error: `Mailchimp content failed: ${contentRes.status} ${JSON.stringify(detail).slice(0, 200)}` };
     }
 
@@ -206,6 +240,7 @@ export async function broadcastEmail(params: {
     });
     if (!sendRes.ok) {
       const detail = await sendRes.json().catch(() => ({}));
+      await deleteMailchimpCampaign(base, authHeader, campaignId);
       return { ...result, error: `Mailchimp send failed: ${sendRes.status} ${JSON.stringify(detail).slice(0, 200)}` };
     }
     result.sent = result.attempted;
