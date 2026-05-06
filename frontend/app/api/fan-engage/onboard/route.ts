@@ -142,6 +142,27 @@ export async function POST(request: Request) {
       // non-fatal — profile save still succeeded
     }
 
+    // 4. Founding-fan badge — auto-awarded to anyone who completes
+    //    onboarding before the founding window closes (2026-07-15). The
+    //    `award_badge` Supabase function handles dedupe + in-app
+    //    notification; the wider try/catch ensures onboarding still
+    //    succeeds even if the badge insert errors.
+    const FOUNDING_CUTOFF = new Date("2026-07-16T00:00:00Z");
+    if (new Date() < FOUNDING_CUTOFF) {
+      try {
+        const admin = createAdminClient();
+        const { error: badgeErr } = await admin.rpc("award_badge", {
+          p_fan_id: user.id,
+          p_slug: "founder-fan",
+        });
+        if (badgeErr) {
+          console.warn("onboard: founder-fan award_badge rpc failed", badgeErr);
+        }
+      } catch (err) {
+        console.warn("onboard: founder-fan badge award failed", err);
+      }
+    }
+
     return NextResponse.json({ success: true, fan });
   } catch (err) {
     console.error("onboard route error:", err);
