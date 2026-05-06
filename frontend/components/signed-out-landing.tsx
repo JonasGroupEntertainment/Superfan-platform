@@ -1,15 +1,25 @@
 import Link from "next/link";
 import type { Artist } from "@/lib/artists";
+import type { LandingStats } from "@/lib/data/landing-stats";
+import FoundingFanBlock from "@/components/founding-fan-block";
 
 /**
  * Public-facing marketing landing rendered at `/` for signed-out visitors.
  *
- * Structured like the funnel we actually want: big hero with a single primary
- * CTA, then progressive disclosure (how-it-works → feature pillars → featured
- * artists → closing CTA). Signed-in fans never see this — they hit the
- * personalized Fan Home dashboard from Phase 3e instead.
+ * Funnel order:
+ *   hero → founding-fan urgency → live proof tiles → how-it-works →
+ *   feature pillars → featured artists → closing CTA.
+ *
+ * Signed-in fans never see this — they hit the personalized Fan Home
+ * dashboard from Phase 3e instead.
  */
-export default function SignedOutLanding({ artists }: { artists: Artist[] }) {
+export default function SignedOutLanding({
+  artists,
+  stats,
+}: {
+  artists: Artist[];
+  stats: LandingStats;
+}) {
   const featured = artists.slice(0, 5);
 
   return (
@@ -34,16 +44,15 @@ export default function SignedOutLanding({ artists }: { artists: Artist[] }) {
               className="text-5xl font-semibold leading-[1.05] md:text-6xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Your favorite artists.
+              Turn casual fans
               <br />
               <span className="bg-gradient-to-r from-aurora via-fuchsia-400 to-ember bg-clip-text text-transparent">
-                Your front-row seat.
+                into real superfans.
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-lg text-white/70">
               Follow the artists you love, earn points for every fan move, and
-              unlock real drops — signed vinyl, backstage access, listening
-              parties. Built for the fans who actually show up.
+              unlock real drops, events, and access the casuals never see.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
@@ -117,6 +126,27 @@ export default function SignedOutLanding({ artists }: { artists: Artist[] }) {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ─── Founding-fan urgency ─────────────────────────────────────────── */}
+      <FoundingFanBlock stats={stats} />
+
+      {/* ─── Live proof tiles ─────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ProofTile label="Active artists" value={stats.activeArtists} icon="🎤" />
+          <ProofTile label="Live shows lined up" value={stats.activeEvents} icon="🎟️" />
+          <ProofTile
+            label="Founding fans inducted"
+            value={stats.foundingFans}
+            icon="🏅"
+          />
+          <ProofTile
+            label="Days to claim founding"
+            value={stats.daysUntilFoundingCloses}
+            icon="⏳"
+          />
         </div>
       </section>
 
@@ -315,5 +345,32 @@ export default function SignedOutLanding({ artists }: { artists: Artist[] }) {
         </div>
       </section>
     </main>
+  );
+}
+
+function ProofTile({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number;
+  icon: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-5">
+      <div className="flex items-center justify-between">
+        <span className="text-2xl">{icon}</span>
+        <span
+          className="text-3xl font-semibold tabular-nums text-white"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {value.toLocaleString("en-US")}
+        </span>
+      </div>
+      <p className="mt-3 text-xs uppercase tracking-wide text-white/55">
+        {label}
+      </p>
+    </div>
   );
 }

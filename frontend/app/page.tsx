@@ -5,6 +5,7 @@ import FanHomeDashboard from "@/components/fan-home-dashboard";
 import InviteQRCode from "@/components/invite-qr";
 import SignedOutLanding from "@/components/signed-out-landing";
 import { listArtistsFromDb } from "@/lib/data/artists";
+import { getLandingStats } from "@/lib/data/landing-stats";
 import { getCurrentFan, getCurrentFanKpis } from "@/lib/data/fan";
 import { getFanHomeData } from "@/lib/data/fan-home";
 import { getFeaturedOffers } from "@/lib/data/offers";
@@ -54,8 +55,11 @@ export default async function Home({
   const isSignedIn = fan !== null;
 
   if (!isSignedIn) {
-    const artists = await listArtistsFromDb();
-    return <SignedOutLanding artists={artists} />;
+    const [artists, stats] = await Promise.all([
+      listArtistsFromDb(),
+      getLandingStats(),
+    ]);
+    return <SignedOutLanding artists={artists} stats={stats} />;
   }
 
   // Signed-in path — parallel-fetch everything the dashboard needs. Each
