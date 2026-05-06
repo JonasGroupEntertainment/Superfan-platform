@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import ImageUploader from "@/components/image-uploader";
 import VideoUploader from "@/components/video-uploader";
 import CaptionSuggester from "./caption-suggester";
+import AltTextSuggester from "@/components/community/alt-text-suggester";
 import TagSuggester from "@/components/community/tag-suggester";
 import { useFormSave, SaveStatusIndicator } from "@/lib/use-form-save";
 import {
@@ -280,6 +281,14 @@ export default function NewPostForm({
                 );
               }}
               onUsedChange={setCaptionUsed}
+            />
+          )}
+          {/* AI alt-text — auto-fires on upload, fan can edit */}
+          {imageUrl && (
+            <AltTextSuggester
+              imageUrl={imageUrl}
+              artistSlug={artistSlug}
+              partialBody={body}
             />
           )}
         </>
