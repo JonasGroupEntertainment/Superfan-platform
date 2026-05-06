@@ -56,7 +56,7 @@ async function loadFeed() {
       .limit(50),
     admin
       .from("community_challenge_entries")
-      .select("id,post_id,body,image_url,created_at,fan_id")
+      .select("id,post_id,body,image_url, image_alt,created_at,fan_id")
       .order("created_at", { ascending: false })
       .limit(50),
     admin.from("fans").select("id,first_name"),
