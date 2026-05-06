@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ShareButton from "@/components/share-button";
 import { redirect } from "next/navigation";
 import { getStripe } from "@/lib/stripe";
 import { getCurrentCommunity } from "@/lib/community";
@@ -263,6 +264,15 @@ export default async function PremiumWelcomePage({
           >
             Go to community →
           </Link>
+          {isFounder && status === "complete" && founderNumber !== null && community?.slug && (
+            <ShareButton
+              title={`I'm Founder #${founderNumber} for ${community.display_name ?? community.slug}`}
+              text={`Just claimed Founder #${founderNumber} on Fan Engage. One of 100. ${process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app"}/share/founder/${community.slug}/${founderNumber}`}
+              url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app"}/share/founder/${community.slug}/${founderNumber}`}
+              label="Share my badge"
+              variant="ghost"
+            />
+          )}
           <Link
             href="/inbox"
             className="rounded-full border border-white/25 px-5 py-3 text-sm font-medium text-white/80 hover:bg-white/10"

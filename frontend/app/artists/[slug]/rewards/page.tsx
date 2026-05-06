@@ -110,7 +110,7 @@ export default async function RewardsPage({
         {rewards.length > 0 ? (
           <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rewards.map((reward) => (
-              <RewardCardWithForm key={reward.id} reward={reward} />
+              <RewardCardWithForm key={reward.id} reward={reward} artistSlug={slug} artistName={artist.name} />
             ))}
           </div>
         ) : (

@@ -5,7 +5,20 @@ import DropCountdown from "@/components/drop-countdown";
 import Image from "next/image";
 import { RedeemForm } from "./redeem-form";
 
-export default function RewardCardWithForm({ reward }: { reward: any }) {
+interface RewardCardProps {
+  reward: any;
+  /** Artist slug — passed through to RedeemForm so its success-state
+   *  share button can build a working share URL.  */
+  artistSlug: string;
+  /** Artist display name — used in the share message body. */
+  artistName: string;
+}
+
+export default function RewardCardWithForm({
+  reward,
+  artistSlug,
+  artistName,
+}: RewardCardProps) {
   const [showForm, setShowForm] = useState(false);
 
   return (
@@ -57,6 +70,8 @@ export default function RewardCardWithForm({ reward }: { reward: any }) {
           rewardId={reward.id}
           rewardTitle={reward.title}
           pointCost={reward.point_cost}
+          artistSlug={artistSlug}
+          artistName={artistName}
           onSuccess={() => {
             setShowForm(false);
             // TODO: trigger toast/refresh
