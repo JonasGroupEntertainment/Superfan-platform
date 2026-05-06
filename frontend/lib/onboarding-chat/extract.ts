@@ -11,7 +11,7 @@ const EXTRACTION_MODEL = "claude-haiku-4-5";
 
 export type ExtractedFields = {
   city: string | null;
-  favorite_song: string | null;
+  music_outlet: string | null;
   interest: string | null;
   sms_opted_in: boolean | null;
 };
@@ -22,7 +22,7 @@ interface AnthropicMessageResponse {
 
 const EMPTY: ExtractedFields = {
   city: null,
-  favorite_song: null,
+  music_outlet: null,
   interest: null,
   sms_opted_in: null,
 };
@@ -72,7 +72,7 @@ export async function extractFields(
 
   return {
     city: stringOrNull(r.city, 80),
-    favorite_song: stringOrNull(r.favorite_song, 200),
+    music_outlet: stringOrNull(r.music_outlet, 200),
     interest: stringOrNull(r.interest, 400),
     sms_opted_in: typeof r.sms_opted_in === "boolean" ? r.sms_opted_in : null,
   };
@@ -90,14 +90,14 @@ const SYSTEM_PROMPT = `Extract structured fan-profile fields from this onboardin
 Schema:
   {
     "city": string | null,
-    "favorite_song": string | null,
+    "music_outlet": string | null,
     "interest": string | null,
     "sms_opted_in": boolean | null
   }
 
 Rules:
   * city: city name only (no state). Null if not mentioned or unclear.
-  * favorite_song: song title only, no quotes. Null if not mentioned.
+  * music_outlet: song title only, no quotes. Null if not mentioned.
   * interest: 1-2 sentence summary of what the fan said about the artist or what they're hoping for from the fan club. Null if they didn't say anything substantive.
   * sms_opted_in: true if they clearly said yes to SMS / texts / tour notifications. false if they declined. Null if not asked or ambiguous.
   * Don't infer beyond what the fan actually said. Empty answers → null.

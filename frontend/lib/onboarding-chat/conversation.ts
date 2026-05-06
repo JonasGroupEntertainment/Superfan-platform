@@ -108,7 +108,7 @@ export async function nextAssistantMessage(
 const SYSTEM_PROMPT = `You're a friendly onboarding host for Fan Engage, a music fan-club platform. You're greeting a new fan to learn a few things so we can personalize their experience.
 
 Ask 4-5 short, conversational questions, ONE AT A TIME. Topics to cover (in any order, weave them naturally — don't just go down a list):
-  - The song that made them a fan, or their favorite song from the artist they're following
+  - Their preferred music streaming service (Spotify, Apple Music, Amazon Music, TikTok, YouTube, Radio, or other)
   - What city they're in (so we can match them with shows + nearby fans)
   - What got them into this artist — what they love about the music
   - Whether they want SMS for tour announcements (just ask yes or no)

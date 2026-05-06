@@ -10,7 +10,7 @@ type OnboardPayload = {
   city?: string;
   phone?: string;
   handle?: string;
-  favoriteSong?: string;
+  musicOutlet?: string;
   interest?: string;
   referralCode?: string; // optional — the ref code that was passed in the invite link
   smsOptedIn?: boolean;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         city: payload.city ?? null,
         phone: payload.phone ?? null,
         handle: payload.handle ?? null,
-        favorite_song: payload.favoriteSong ?? null,
+        music_outlet: payload.musicOutlet ?? null,
         interest: payload.interest ?? null,
         sms_opted_in: Boolean(payload.smsOptedIn),
         email_opted_in: Boolean(payload.emailOptedIn),

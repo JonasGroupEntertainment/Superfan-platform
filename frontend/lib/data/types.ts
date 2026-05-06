@@ -32,7 +32,7 @@ export interface FanProfile {
   city: string | null;
   phone: string | null;
   handle: string | null;
-  favorite_song: string | null;
+  music_outlet: string | null;
   interest: string | null;
   referral_code: string | null;
   referred_by: string | null;
