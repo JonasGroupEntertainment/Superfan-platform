@@ -12,12 +12,17 @@ interface RewardCardProps {
   artistSlug: string;
   /** Artist display name — used in the share message body. */
   artistName: string;
+  /** Current fan's profile handle — used by the redeem success state
+   *  to surface a "View your updated profile" link. Optional because
+   *  RLS or signup races can briefly leave a fan handle-less. */
+  fanHandle?: string | null;
 }
 
 export default function RewardCardWithForm({
   reward,
   artistSlug,
   artistName,
+  fanHandle,
 }: RewardCardProps) {
   const [showForm, setShowForm] = useState(false);
 
@@ -72,6 +77,7 @@ export default function RewardCardWithForm({
           pointCost={reward.point_cost}
           artistSlug={artistSlug}
           artistName={artistName}
+          fanHandle={fanHandle ?? null}
           onSuccess={() => {
             setShowForm(false);
             // TODO: trigger toast/refresh

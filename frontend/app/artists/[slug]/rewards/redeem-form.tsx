@@ -12,6 +12,9 @@ interface RedeemFormProps {
   artistSlug: string;
   /** Artist display name — used in the share message body. */
   artistName: string;
+  /** Current fan's profile handle — used to link to /fans/<handle>
+   *  from the success state so the fan can see their updated profile. */
+  fanHandle?: string | null;
   onSuccess: () => void;
   onClose: () => void;
 }
@@ -22,6 +25,7 @@ export function RedeemForm({
   pointCost,
   artistSlug,
   artistName,
+  fanHandle,
   onSuccess,
   onClose,
 }: RedeemFormProps) {
@@ -91,6 +95,14 @@ export function RedeemForm({
                 label="Share this drop"
                 variant="primary"
               />
+              {fanHandle && (
+                <a
+                  href={`/fans/${fanHandle}`}
+                  className="text-xs text-white/65 underline hover:text-white"
+                >
+                  View your updated profile →
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() => {

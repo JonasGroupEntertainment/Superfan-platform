@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/stripe";
 import { getCurrentCommunity } from "@/lib/community";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getFanHandle } from "@/lib/data/fan-profile";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,7 @@ export default async function PremiumWelcomePage({
   // hasn't run yet, founder_number is null and we show a pending state.
   let founderNumber: number | null = null;
   let fanFirstName: string | null = null;
+  let fanHandle: string | null = null;
   if (isFounder && status === "complete" && community) {
     try {
       const supabase = await createClient();
@@ -85,10 +87,11 @@ export default async function PremiumWelcomePage({
         }
         const { data: fan } = await admin
           .from("fans")
-          .select("first_name")
+          .select("first_name, handle")
           .eq("id", user.id)
           .maybeSingle();
         fanFirstName = (fan?.first_name as string | null) ?? null;
+        fanHandle = (fan?.handle as string | null) ?? null;
       }
     } catch (err) {
       console.warn("PremiumWelcomePage: founder lookup failed", err);
@@ -272,6 +275,14 @@ export default async function PremiumWelcomePage({
               label="Share my badge"
               variant="ghost"
             />
+          )}
+          {fanHandle && (
+            <Link
+              href={`/fans/${fanHandle}`}
+              className="rounded-full border border-white/25 px-5 py-3 text-sm font-medium text-white/80 hover:bg-white/10"
+            >
+              View your profile →
+            </Link>
           )}
           <Link
             href="/inbox"

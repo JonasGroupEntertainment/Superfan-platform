@@ -4,6 +4,7 @@ import { getArtistFromDb } from "@/lib/data/artists";
 import { listRewardsForCommunity, listMyRedemptions } from "@/lib/data/rewards";
 import Image from "next/image";
 import RewardCardWithForm from "./reward-card";
+import { getFanHandle } from "@/lib/data/fan-profile";
 import RecommendedRewardCard from "./recommended-reward-card";
 import { recommendReward } from "@/lib/recs";
 import { MarketplaceEmptyState, MIN_INVENTORY } from "@/components/marketplace-empty-state";
@@ -57,12 +58,13 @@ export default async function RewardsPage({
   const artist = await getArtistFromDb(slug);
   if (!artist) return notFound();
 
-  const [rewards, myRedemptions, rec] = await Promise.all([
+  const [rewards, myRedemptions, rec, fanHandle] = await Promise.all([
     listRewardsForCommunity(slug),
     listMyRedemptions(user.id),
     dismissRec
       ? Promise.resolve(null)
       : recommendReward({ fanId: user.id, communityId: slug }),
+    getFanHandle(user.id).catch(() => null),
   ]);
 
   if (rewards.length < MIN_INVENTORY) {
@@ -110,7 +112,7 @@ export default async function RewardsPage({
         {rewards.length > 0 ? (
           <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rewards.map((reward) => (
-              <RewardCardWithForm key={reward.id} reward={reward} artistSlug={slug} artistName={artist.name} />
+              <RewardCardWithForm key={reward.id} reward={reward} artistSlug={slug} artistName={artist.name} fanHandle={fanHandle} />
             ))}
           </div>
         ) : (
