@@ -3,7 +3,7 @@ import Link from "next/link";
 import { listPolicies } from "@/lib/data/policies";
 
 export const metadata: Metadata = {
-  title: "Legal & Privacy · Fan Engage",
+  title: "Legal & Privacy",
   robots: { index: false, follow: false },
 };
 

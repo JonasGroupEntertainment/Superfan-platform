@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PolicyPage from "@/app/(legal)/policy-page";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy · Fan Engage",
+  title: "Cookie Policy",
   robots: { index: false, follow: false },
 };
 

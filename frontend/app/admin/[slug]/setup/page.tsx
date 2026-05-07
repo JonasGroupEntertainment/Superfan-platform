@@ -12,7 +12,7 @@ import SocialForm from "./social-form";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Setup · Admin · Fan Engage" };
+export const metadata = { title: "Setup · Admin" };
 
 interface PageProps {
   params: Promise<{ slug: string }>;

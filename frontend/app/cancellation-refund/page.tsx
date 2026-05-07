@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PolicyPage from "@/app/(legal)/policy-page";
 
 export const metadata: Metadata = {
-  title: "Cancellation & Refund Policy · Fan Engage",
+  title: "Cancellation & Refund Policy",
 };
 
 export const dynamic = "force-dynamic";

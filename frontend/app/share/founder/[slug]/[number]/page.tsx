@@ -21,7 +21,7 @@ export async function generateMetadata({
   const { slug, number } = await params;
   const artist = await getArtistFromDb(slug).catch(() => null);
   const artistName = artist?.name ?? "Fan Engage";
-  const title = `Founder #${number} for ${artistName} · Fan Engage`;
+  const title = `Founder #${number} for ${artistName}`;
   const description = `One of 100 founding fans for ${artistName} on Fan Engage. Founder tier — points multiplier, early drops, founder-only experiences.`;
   return {
     title,

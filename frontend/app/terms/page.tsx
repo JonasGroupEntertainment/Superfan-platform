@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PolicyPage from "@/app/(legal)/policy-page";
 
 export const metadata: Metadata = {
-  title: "Terms of Service · Fan Engage",
+  title: "Terms of Service",
   robots: { index: false, follow: false },
 };
 

@@ -1,7 +1,7 @@
 import ApplyForm from "./apply-form";
 
 export const metadata = {
-  title: "Apply as an Artist · Fan Engage",
+  title: "Apply as an Artist",
   description:
     "Apply to launch an artist fan club on Fan Engage. Tell us about your music, fanbase, and launch goals — we respond within 48 hours.",
   alternates: { canonical: "/for-artists/apply" },
@@ -9,7 +9,7 @@ export const metadata = {
     type: "website",
     url: "/for-artists/apply",
     siteName: "Fan Engage",
-    title: "Apply to launch your fan club · Fan Engage",
+    title: "Apply to launch your fan club",
     description:
       "Tell us about your music and your fans. No payment or contract required to apply — we respond within 48 hours.",
   },

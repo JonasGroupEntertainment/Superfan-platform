@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "For Artists · Fan Engage",
+  title: "For Artists",
   description:
     "Launch a branded fan club on Fan Engage. Reward superfans, activate drops, promote events, and build direct fan relationships your label can't take from you.",
   alternates: { canonical: "/for-artists" },
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Launch a fan club your superfans actually use · Fan Engage",
+    title: "Launch a fan club your superfans actually use",
     description:
       "Direct fan relationships, real rewards, drops, RSVPs, and community — built for working artists.",
   },

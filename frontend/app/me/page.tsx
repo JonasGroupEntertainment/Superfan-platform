@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Account · Fan Engage" };
+export const metadata = { title: "Account" };
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

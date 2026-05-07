@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import SetRefCookie from "./set-ref-cookie";
 
 export const metadata: Metadata = {
-  title: "You're invited · Fan Engage",
+  title: "You're invited",
 };
 
 async function getInviter(code: string): Promise<{

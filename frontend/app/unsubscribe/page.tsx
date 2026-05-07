@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Unsubscribe · Fan Engage" };
+export const metadata = { title: "Unsubscribe" };
 
 export default async function UnsubscribePage({
   searchParams,

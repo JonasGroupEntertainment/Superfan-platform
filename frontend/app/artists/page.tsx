@@ -3,7 +3,7 @@ import { listArtistsFromDb } from "@/lib/data/artists";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
-  title: "Artists · Fan Engage",
+  title: "Artists",
   description:
     "Browse artist fan clubs on Fan Engage and discover rewards, drops, events, and member-only experiences. Follow the artists you love.",
   alternates: { canonical: "/artists" },
@@ -11,7 +11,7 @@ export const metadata = {
     type: "website",
     url: "/artists",
     siteName: "Fan Engage",
-    title: "Artist fan clubs · Fan Engage",
+    title: "Artist fan clubs",
     description:
       "Follow artists, earn points, and unlock drops on every fan club hosted by Fan Engage.",
   },

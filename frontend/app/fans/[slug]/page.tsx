@@ -30,7 +30,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const profile = await getFanProfileBySlug(slug);
-  if (!profile) return { title: "Fan profile · Fan Engage" };
+  if (!profile) return { title: "Fan profile" };
 
   const name = profile.firstName ?? profile.profileSlug;
   const founderCount = profile.founderBadges.length;
@@ -41,19 +41,19 @@ export async function generateMetadata({
     : `${name}'s superfan profile · ${getTierStyle(profile.tier).label} tier · ${profile.totalPoints.toLocaleString()} points`;
 
   return {
-    title: `${name} · Fan Engage`,
+    title: `${name}`,
     description: desc,
     alternates: { canonical: `/fans/${profile.profileSlug}` },
     openGraph: {
       type: "profile",
       url: `/fans/${profile.profileSlug}`,
       siteName: "Fan Engage",
-      title: `${name}'s superfan profile · Fan Engage`,
+      title: `${name}'s superfan profile`,
       description: desc,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${name}'s superfan profile · Fan Engage`,
+      title: `${name}'s superfan profile`,
       description: desc,
     },
   };

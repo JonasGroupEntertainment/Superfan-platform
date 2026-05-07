@@ -32,8 +32,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const artist = await getArtistFromDb(slug);
-  if (!artist) return { title: "Community · Fan Engage" };
-  return { title: `${artist.name} Community · Fan Engage` };
+  if (!artist) return { title: "Community" };
+  return { title: `${artist.name} Community` };
 }
 
 export default async function ArtistCommunityPage({

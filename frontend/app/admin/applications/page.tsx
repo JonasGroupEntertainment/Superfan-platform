@@ -3,7 +3,7 @@ import ApplicationActions from "./application-actions";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Applications · Admin · Fan Engage" };
+export const metadata = { title: "Applications · Admin" };
 
 const STATUS_BADGE: Record<string, string> = {
   pending: "bg-amber-500/20 text-amber-300",

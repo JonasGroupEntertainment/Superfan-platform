@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SignupForm, type ReferrerArtist } from "./signup-form";
 
-export const metadata = { title: "Sign up · Fan Engage" };
+export const metadata = { title: "Sign up" };
 
 async function getReferrerName(): Promise<string | null> {
   const cookieStore = await cookies();

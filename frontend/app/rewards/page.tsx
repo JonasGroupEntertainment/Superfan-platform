@@ -52,7 +52,7 @@ function formatPts(n: number | null | undefined) {
   return new Intl.NumberFormat("en-US").format(n) + " pts";
 }
 
-export const metadata = { title: "Rewards · Fan Engage" };
+export const metadata = { title: "Rewards" };
 
 export default async function RewardsPage() {
   const [fan, kpis, tiers, dbBadges, breakdown] = await Promise.all([

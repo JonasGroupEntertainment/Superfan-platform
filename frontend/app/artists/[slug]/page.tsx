@@ -54,9 +54,9 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await params;
   const artist = await getArtistFromDb(slug);
-  if (!artist) return { title: "Artist · Fan Engage" };
+  if (!artist) return { title: "Artist" };
   return {
-    title: `${artist.name} · Fan Engage`,
+    title: `${artist.name}`,
     description: artist.tagline,
   };
 }
