@@ -78,6 +78,15 @@ export default function ForArtistsPage() {
         <p className="pt-2 text-xs text-white/50">
           No payment or contract required to apply. We respond within 48 hours.
         </p>
+        <p className="text-xs text-white/45">
+          Already approved?{" "}
+          <Link
+            href="/login"
+            className="text-white/80 underline-offset-4 hover:underline"
+          >
+            Sign in to your admin →
+          </Link>
+        </p>
       </section>
 
       {/* ─── Proof: what's already live ────────────────────────────────────── */}

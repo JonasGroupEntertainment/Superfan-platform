@@ -211,6 +211,15 @@ export function SignupForm({ referrerName }: { referrerName?: string | null }) {
             Sign in
           </Link>
         </p>
+        <p className="text-center text-xs text-white/50">
+          Are you an artist or manager?{" "}
+          <Link
+            href="/for-artists/apply"
+            className="text-white underline-offset-4 hover:underline"
+          >
+            Apply to launch your fan club →
+          </Link>
+        </p>
       </div>
     </main>
   );
