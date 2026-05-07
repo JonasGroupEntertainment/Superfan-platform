@@ -139,7 +139,14 @@ export default function OnboardingWizard() {
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) {
+      if (!user) {
+        // Anonymous visitor (or expired session) — onboarding wizard
+        // expects an authenticated user. Send them to /signup with a
+        // return URL so the auth callback bounces them back here.
+        router.replace("/signup?next=/onboarding");
+        return;
+      }
+      if (user.email) {
         setFormState((prev) => ({ ...prev, email: user.email ?? "" }));
         setEmailAutoFilled(true);
       }
