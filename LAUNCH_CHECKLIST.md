@@ -1312,3 +1312,33 @@ The previous `fans.handle` column was overloaded — the onboarding wizard wrote
 **Run**: `frontend/supabase/migrations/0035_socials_and_profile_slug.sql` in FE Supabase project `uhovonrljcauaoctypbg`.
 **Verify**: `select count(*) filter (where profile_slug is null), count(*) from public.fans;` → expect (0, total).
 
+## 🪶 Post-launch polish — May 6 sprint smoke test
+
+Two cosmetic / structural items surfaced during the prod smoke pass after the handle/socials refactor + Bundle 4 deploys. Neither is blocking.
+
+### 1. Page-title doubling (`X · Fan Engage · Fan Engage`)
+
+Every page that supplies a `title` in its `metadata` block currently renders as `"<Page> · Fan Engage · Fan Engage"` in the browser tab. Cause: `app/layout.tsx` exports a `metadata.title.template` like `"%s · Fan Engage"` and the page-level metadata strings also already include `· Fan Engage`. Next.js applies the template to whatever the page returns, so the suffix gets appended twice.
+
+**Fix options (pick one):**
+- (a) Remove the trailing `· Fan Engage` from every page-level `title` string and let the layout template add it. Cleanest, requires touching: `/for-artists`, `/for-artists/apply`, `/artists`, `/fans/[slug]`, `/members/[slug]` siblings, `/share/founder/[slug]/[number]`, etc.
+- (b) Drop the `template` from layout and let each page own its full title. Less coupling but more boilerplate per page.
+
+**Where:** `frontend/app/layout.tsx` + each page-level `metadata.title`.
+
+### 2. Migration broader-update would re-leak socials on a fresh DB
+
+When migration `0035_socials_and_profile_slug.sql` ran in FE Supabase, the conservative `where (handle ~ '[^a-z0-9-]' or handle ~ '^@')` filter only caught 1 of 8 fans (the one with `@`-prefixed Instagram). I followed up with a broader `where handle is not null` update to move the rest. That broader update was correct in production *because* the source values were the onboarding wizard's social-handle inputs — but the same logic applied to a fresh DB where `handle` already holds the auto-generated slugs from `0034`'s backfill would incorrectly stuff slugs into `socials.instagram_or_tiktok`.
+
+The leak was caught and cleaned in FE prod with:
+```sql
+update public.fans
+  set socials = socials - 'instagram_or_tiktok'
+where socials->>'instagram_or_tiktok' = profile_slug;
+```
+…which preserves real social handles (`countrycarlamoore`, `@raymondboyd`, `mauten85`) and strips the auto-generated `kevin-bf02`-style values.
+
+**Hardening for future re-runs:**
+- Update `0035` (and BEP's `0033`) source files to NOT include the broader cleanup step. Keep only the conservative regex. Document the post-migration cleanup as a manual step run only when the source population is confirmed to be from an onboarding social-handle field.
+- Add the discriminator query above as a verification step in the migration comments so anyone re-running can confirm before/after.
+
