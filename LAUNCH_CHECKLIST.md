@@ -1291,3 +1291,13 @@ Migration 0034 + /fans/<handle> route shipped 2026-05-06. The following are defe
 - [ ] **Activity feed on profile** — chronological feed of public events on the fan's profile (badges earned, founder claims, drops won) the way GitHub profiles surface activity.
 - [ ] **Profile share auto-prompt** — when a fan earns their first badge or claims a founder slot, surface a one-time toast: "Your profile is live at fan-engage.com/fans/<handle> — share it?"
 
+## 🔐 OAuth re-enable (gated on G.4)
+
+- [ ] **Configure Supabase custom auth domain** — Supabase Pro setting; e.g. `auth.fanengage.com`. Without this, the Google consent screen shows the raw Supabase project URL, which reads as untrustworthy.
+- [ ] **Update Google OAuth client redirect URIs** in Cloud Console to point at the custom auth domain.
+- [ ] **Update Apple OAuth Service ID redirect** to match (if/when Apple SSO is wired up; currently deferred per `reference_google_oauth.md` memory).
+- [ ] **Submit Google OAuth consent screen for verification** so 'Fan Engage' appears prominently instead of the redirect host. (Optional but recommended.)
+- [ ] **Restore OAuth buttons in `frontend/app/signup/signup-form.tsx`** — git history has the original block at the commit before this gate landed. Revert that commit's hunk to bring them back.
+
+Until all of the above are done, signup is email-only. The OAuth buttons are commented out with a self-documenting block in signup-form.tsx.
+
