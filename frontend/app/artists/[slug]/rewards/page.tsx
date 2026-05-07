@@ -4,7 +4,7 @@ import { getArtistFromDb } from "@/lib/data/artists";
 import { listRewardsForCommunity, listMyRedemptions } from "@/lib/data/rewards";
 import Image from "next/image";
 import RewardCardWithForm from "./reward-card";
-import { getFanHandle } from "@/lib/data/fan-profile";
+import { getFanProfileSlug } from "@/lib/data/fan-profile";
 import RecommendedRewardCard from "./recommended-reward-card";
 import { recommendReward } from "@/lib/recs";
 import { MarketplaceEmptyState, MIN_INVENTORY } from "@/components/marketplace-empty-state";
@@ -64,7 +64,7 @@ export default async function RewardsPage({
     dismissRec
       ? Promise.resolve(null)
       : recommendReward({ fanId: user.id, communityId: slug }),
-    getFanHandle(user.id).catch(() => null),
+    getFanProfileSlug(user.id).catch(() => null),
   ]);
 
   if (rewards.length < MIN_INVENTORY) {

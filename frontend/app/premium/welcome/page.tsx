@@ -5,7 +5,6 @@ import { getStripe } from "@/lib/stripe";
 import { getCurrentCommunity } from "@/lib/community";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getFanHandle } from "@/lib/data/fan-profile";
 
 export const dynamic = "force-dynamic";
 
@@ -87,11 +86,11 @@ export default async function PremiumWelcomePage({
         }
         const { data: fan } = await admin
           .from("fans")
-          .select("first_name, handle")
+          .select("first_name, profile_slug")
           .eq("id", user.id)
           .maybeSingle();
         fanFirstName = (fan?.first_name as string | null) ?? null;
-        fanHandle = (fan?.handle as string | null) ?? null;
+        fanHandle = (fan?.profile_slug as string | null) ?? null;
       }
     } catch (err) {
       console.warn("PremiumWelcomePage: founder lookup failed", err);
