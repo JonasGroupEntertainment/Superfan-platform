@@ -1301,3 +1301,14 @@ Migration 0034 + /fans/<handle> route shipped 2026-05-06. The following are defe
 
 Until all of the above are done, signup is email-only. The OAuth buttons are commented out with a self-documenting block in signup-form.tsx.
 
+## 🔧 Handle / socials refactor
+
+The previous `fans.handle` column was overloaded — the onboarding wizard wrote a TikTok/Instagram handle to it AND the public profile feature used it as a URL slug. Migration 0035 splits the two:
+
+- **`fans.socials`** (jsonb) — social handles. Onboarding's "TikTok or Instagram handle" field now lands at `socials.instagram_or_tiktok`.
+- **`fans.profile_slug`** (text) — URL slug for `/fans/<slug>`. Trigger generates `firstname-XXXX` on insert.
+- **`fans.handle`** (legacy) — kept as a deprecated column. Values that looked like social handles (started with `@` or had non-slug characters) were moved to socials and the source nulled. Drop after the next clean release.
+
+**Run**: `frontend/supabase/migrations/0035_socials_and_profile_slug.sql` in FE Supabase project `uhovonrljcauaoctypbg`.
+**Verify**: `select count(*) filter (where profile_slug is null), count(*) from public.fans;` → expect (0, total).
+

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getFanProfileByHandle } from "@/lib/data/fan-profile";
+import { getFanProfileBySlug } from "@/lib/data/fan-profile";
 import ShareButton from "@/components/share-button";
 
 export const dynamic = "force-dynamic";
@@ -26,13 +26,13 @@ function formatMemberSince(iso: string): string {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ handle: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { handle } = await params;
-  const profile = await getFanProfileByHandle(handle);
+  const { slug } = await params;
+  const profile = await getFanProfileBySlug(slug);
   if (!profile) return { title: "Fan profile · Fan Engage" };
 
-  const name = profile.firstName ?? profile.handle;
+  const name = profile.firstName ?? profile.profileSlug;
   const founderCount = profile.founderBadges.length;
   const desc = founderCount
     ? `${name}'s superfan profile · ${getTierStyle(profile.tier).label} tier · Founder for ${profile.founderBadges
@@ -43,10 +43,10 @@ export async function generateMetadata({
   return {
     title: `${name} · Fan Engage`,
     description: desc,
-    alternates: { canonical: `/fans/${profile.handle}` },
+    alternates: { canonical: `/fans/${profile.profileSlug}` },
     openGraph: {
       type: "profile",
-      url: `/fans/${profile.handle}`,
+      url: `/fans/${profile.profileSlug}`,
       siteName: "Fan Engage",
       title: `${name}'s superfan profile · Fan Engage`,
       description: desc,
@@ -62,27 +62,28 @@ export async function generateMetadata({
 export default async function FanProfilePage({
   params,
 }: {
-  params: Promise<{ handle: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { handle } = await params;
-  const profile = await getFanProfileByHandle(handle);
+  const { slug } = await params;
+  const profile = await getFanProfileBySlug(slug);
   if (!profile) notFound();
 
   const tier = getTierStyle(profile.tier);
   const initial = (profile.firstName?.[0] ?? "F").toUpperCase();
-  const displayName = profile.firstName ?? profile.handle;
+  const displayName = profile.firstName ?? profile.profileSlug;
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app";
-  const profileUrl = `${appUrl}/fans/${profile.handle}`;
+  const profileUrl = `${appUrl}/fans/${profile.profileSlug}`;
   const shareTitle = `${displayName}'s superfan profile on Fan Engage`;
   const founderLine = profile.founderBadges.length
     ? `Founder for ${profile.founderBadges.map((f) => f.communityName).join(", ")}.`
     : "";
   const shareText = `${shareTitle}. ${founderLine} ${profile.totalPoints.toLocaleString()} pts · ${tier.label} tier. ${profileUrl}`;
 
+  const socialHandle = profile.socials.instagram_or_tiktok?.trim();
+
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
-      {/* ─── Header ──────────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden rounded-3xl border border-white/15 p-8 shadow-glass md:p-10"
         style={{
@@ -122,12 +123,16 @@ export default async function FanProfilePage({
               {displayName}
             </h1>
             <p className="mt-2 text-sm text-white/65">
-              @{profile.handle} · Member since {formatMemberSince(profile.memberSince)}
+              @{profile.profileSlug} · Member since {formatMemberSince(profile.memberSince)}
             </p>
+            {socialHandle && (
+              <p className="mt-1 text-xs text-white/55">
+                Find them on TikTok/Instagram: {socialHandle}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Stats row */}
         <div className="relative mt-8 grid grid-cols-3 gap-3 text-center">
           <div className="rounded-2xl bg-white/5 px-3 py-4">
             <p className="text-2xl font-bold tabular-nums">
@@ -160,7 +165,6 @@ export default async function FanProfilePage({
         </div>
       </section>
 
-      {/* ─── Founder badges (most-shareable, surfaced first) ──────── */}
       {profile.founderBadges.length > 0 && (
         <section className="mt-12 space-y-4">
           <h2
@@ -205,7 +209,6 @@ export default async function FanProfilePage({
         </section>
       )}
 
-      {/* ─── All badges grid ─────────────────────────────────────────── */}
       {profile.badges.length > 0 && (
         <section className="mt-12 space-y-4">
           <h2
@@ -240,7 +243,6 @@ export default async function FanProfilePage({
         </section>
       )}
 
-      {/* ─── Communities followed ────────────────────────────────────── */}
       {profile.communities.length > 0 && (
         <section className="mt-12 space-y-4">
           <h2
@@ -263,7 +265,6 @@ export default async function FanProfilePage({
         </section>
       )}
 
-      {/* ─── Empty state if there's truly nothing to show ────────────── */}
       {profile.founderBadges.length === 0 &&
         profile.badges.length === 0 &&
         profile.communities.length === 0 && (
@@ -280,7 +281,6 @@ export default async function FanProfilePage({
           </section>
         )}
 
-      {/* ─── Closing CTA ─────────────────────────────────────────────── */}
       <section className="mt-16 rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
         <p className="text-sm font-medium text-white/85">
           Want a profile of your own?

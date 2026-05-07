@@ -9,7 +9,7 @@ interface UserMenuProps {
     email: string | null | undefined;
     first_name: string | null;
     avatar_url: string | null;
-    handle: string | null;
+    profileSlug: string | null;
   } | null;
   isAdmin: boolean;
   unreadCount?: number;
@@ -113,9 +113,9 @@ export default function UserMenu({ fan, isAdmin, unreadCount = 0 }: UserMenuProp
             </Link>
 
             {/* My Profile */}
-            {fan.handle && (
+            {fan.profileSlug && (
               <Link
-                href={`/fans/${fan.handle}`}
+                href={`/fans/${fan.profileSlug}`}
                 className="block px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
