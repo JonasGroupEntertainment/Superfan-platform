@@ -17,6 +17,7 @@ import SocialIcon from "@/components/social-icon";
 import FollowButton from "./follow-button";
 import ShareButton from "@/components/share-button";
 import RsvpButton from "./rsvp-button";
+import { ExpandableEventGrid } from "./expandable-event-grid";
 
 
 /**
@@ -262,7 +263,7 @@ export default async function ArtistPage({
       {/* Upcoming */}
       <section className="glass-card p-8">
         <p className="text-sm uppercase tracking-wide text-white/60">Upcoming</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <ExpandableEventGrid threshold={5}>
           {artist.upcoming.map((e) => {
             // Phase 5d: gate premium-tier events. Fallback events (no id)
             // have no DB tier; treat as public.
@@ -347,7 +348,7 @@ export default async function ArtistPage({
               </div>
             );
           })}
-        </div>
+        </ExpandableEventGrid>
       </section>
 
       {/* Top fans leaderboard preview */}
