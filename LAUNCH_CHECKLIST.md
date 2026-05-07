@@ -1342,3 +1342,41 @@ where socials->>'instagram_or_tiktok' = profile_slug;
 - Update `0035` (and BEP's `0033`) source files to NOT include the broader cleanup step. Keep only the conservative regex. Document the post-migration cleanup as a manual step run only when the source population is confirmed to be from an onboarding social-handle field.
 - Add the discriminator query above as a verification step in the migration comments so anyone re-running can confirm before/after.
 
+## ⚖️ Manus audit — legal interim + apply form simplification (May 6)
+
+### Legal pages — interim safe-holding state
+
+While George's corporate-counsel docs are still in flight, the four legal routes (`/privacy`, `/terms`, `/cookie-policy`, `/legal`) carry a production-safe holding state instead of the original "DRAFT — pending legal review / use at your own risk" banner. Each route also has `robots: { index: false, follow: false }` so search engines don't index the holding copy.
+
+**When George's docs land:**
+1. Replace `policies.content_md` with the final text (Supabase Table editor or SQL).
+2. Set `policies.is_draft = false` for that slug.
+3. Optionally remove the `robots: { index: false, follow: false }` from the route's `metadata` export (or leave it — nothing breaks if it stays during the rollout window).
+
+The /legal hub's "DRAFT" pill was also softened to "Being finalized" — same flip when policies go live: drop the holding-state branch in `policy-page.tsx` (or leave it; it's a no-op once `is_draft = false`).
+
+### Apply form — simplified Step 1
+
+`/for-artists/apply` reduced from 5 sections / 20+ visible fields to a single Step 1 with 7 fields:
+
+1. Artist or band name (required)
+2. Your name (required)
+3. Email (required)
+4. Primary genre (required, single-select dropdown)
+5. Primary music or social link (required, URL)
+6. Launch timing (required, dropdown — ASAP / 30d / 60d / 90+d / exploring)
+7. What are you hoping to build? (optional, 500-char textarea)
+
+Detailed onboarding fields (slug, bio, tagline, full social pack, manager info, monthly listeners, tour dates, founder tier interest, distribution platform) move to the existing `/admin/<slug>/setup` wizard which runs after acceptance. No DB migration needed — the new minimal form maps to existing `applications` columns:
+
+- primary_genre → `genres[]` (single-element array)
+- primary_link → `social[]` (`[{label: 'Primary', href}]`)
+- launch_timing → `expected_launch_date` (free-form text)
+- goals_note → `community_pitch`
+
+### Manus items still pending (deferred)
+
+- **Accessibility pass** (P1) — fieldset/legend on radio groups, aria-describedby on errors, alt text on artist directory cards. Not landed in this commit.
+- **PWA install prompt timing** (P2) — delay until after submit / after sign-in / after repeat visit.
+- **Mirror to BEP** — `/for-brands/apply` has the same long-form problem; mirror when ready.
+

@@ -28,10 +28,11 @@ export default function ApplyPage() {
           className="text-4xl font-semibold leading-tight"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Tell us about your music
+          Apply to launch your fan club
         </h1>
         <p className="text-sm text-white/70">
-          We review applications within 48 hours. Required fields are marked.
+          We respond within 48 hours. Quick application — under five
+          minutes. No payment or contract required.
         </p>
       </header>
       <ApplyForm />

@@ -3,6 +3,33 @@
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+/**
+ * Simplified Step 1 artist application server action.
+ *
+ * Maps the 7-field public form into existing `applications` columns
+ * so no migration is needed. Detailed onboarding fields (slug, bio,
+ * tagline, full social pack, manager info, distribution, monthly
+ * listeners, tour dates, founder tier interest) move to the existing
+ * /admin/<slug>/setup wizard run by the team after acceptance.
+ *
+ * Field mapping:
+ *   form: display_name      → applications.display_name
+ *   form: contact_name      → applications.contact_name
+ *   form: contact_email     → applications.contact_email
+ *   form: primary_genre     → applications.genres        (single-element array)
+ *   form: primary_link      → applications.social        ([{label: 'Primary', href}])
+ *   form: launch_timing     → applications.expected_launch_date
+ *   form: goals_note        → applications.community_pitch
+ */
+
+const LAUNCH_TIMING_LABELS: Record<string, string> = {
+  asap: "ASAP",
+  "30d": "Within 30 days",
+  "60d": "Within 60 days",
+  "90d_plus": "90+ days out",
+  exploring: "Just exploring",
+};
+
 export async function submitArtistApplicationAction(
   formData: FormData,
 ): Promise<void> {
@@ -10,66 +37,58 @@ export async function submitArtistApplicationAction(
     const v = formData.get(k);
     return typeof v === "string" ? v.trim() : null;
   };
-  const getBool = (k: string) => formData.get(k) === "on";
-  const getInt = (k: string) => {
-    const v = get(k);
-    if (!v) return null;
-    const n = parseInt(v, 10);
-    return Number.isFinite(n) ? n : null;
-  };
 
   const display_name = get("display_name");
   const contact_name = get("contact_name");
   const contact_email = get("contact_email");
-  if (!display_name || !contact_name || !contact_email) {
+  const primary_genre = get("primary_genre");
+  const primary_link = get("primary_link");
+  const launch_timing_raw = get("launch_timing");
+  const goals_note = get("goals_note");
+
+  // Required-field validation. The form has client-side `required`
+  // attributes; this is the server-side guard for users with JS off
+  // or custom clients.
+  if (
+    !display_name ||
+    !contact_name ||
+    !contact_email ||
+    !primary_genre ||
+    !primary_link ||
+    !launch_timing_raw
+  ) {
     redirect("/for-artists/apply?error=missing-required");
   }
 
-  // Genres: form posts one input per chip checked, named genre_<value>.
-  const genres: string[] = [];
-  for (const key of formData.keys()) {
-    if (key.startsWith("genre_") && formData.get(key) === "on") {
-      genres.push(key.slice("genre_".length));
-    }
-  }
-
-  // Social: build from individual inputs.
-  const socialPairs: { label: string; href: string }[] = [];
-  for (const platform of [
-    "Instagram",
-    "TikTok",
-    "Spotify",
-    "Apple Music",
-    "YouTube",
-    "X",
-    "Facebook",
-  ]) {
-    const key = `social_${platform.toLowerCase().replace(/\s+/g, "")}`;
-    const href = get(key);
-    if (href) socialPairs.push({ label: platform, href });
-  }
+  const launch_label =
+    LAUNCH_TIMING_LABELS[launch_timing_raw ?? ""] ?? launch_timing_raw;
 
   const admin = createAdminClient();
   const { error } = await admin.from("applications").insert({
     display_name,
-    slug_suggestion: get("slug_suggestion"),
-    tagline: get("tagline"),
-    bio: get("bio"),
-    hero_image: get("hero_image"),
-    social: socialPairs,
     contact_name,
     contact_email,
-    contact_phone: get("contact_phone"),
-    genres: genres.length > 0 ? genres : null,
-    manager_name: get("manager_name"),
-    manager_email: get("manager_email"),
-    distribution: get("distribution"),
-    monthly_listeners: getInt("monthly_listeners"),
-    upcoming_tour: get("upcoming_tour"),
-    founder_tier_interest: getBool("founder_tier_interest"),
-    expected_launch_date: get("expected_launch_date"),
-    referral_source: get("referral_source"),
-    community_pitch: get("community_pitch"),
+    genres: primary_genre ? [primary_genre] : null,
+    social: primary_link
+      ? [{ label: "Primary", href: primary_link }]
+      : [],
+    expected_launch_date: launch_label,
+    community_pitch: goals_note,
+    // Legacy columns left null on purpose — the post-acceptance
+    // onboarding wizard fills them in. Listing them here keeps
+    // the database insert explicit and easy to audit.
+    slug_suggestion: null,
+    tagline: null,
+    bio: null,
+    hero_image: null,
+    contact_phone: null,
+    manager_name: null,
+    manager_email: null,
+    distribution: null,
+    monthly_listeners: null,
+    upcoming_tour: null,
+    founder_tier_interest: false,
+    referral_source: null,
   });
 
   if (error) {

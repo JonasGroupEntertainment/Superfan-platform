@@ -4,6 +4,7 @@ import { listPolicies } from "@/lib/data/policies";
 
 export const metadata: Metadata = {
   title: "Legal & Privacy · Fan Engage",
+  robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
@@ -95,8 +96,8 @@ export default async function LegalPage() {
               {/* Draft Badge */}
               {card.isDraft && (
                 <div className="absolute right-4 top-4">
-                  <span className="inline-block rounded-full bg-amber-500/20 px-2 py-1 text-xs font-medium text-amber-200 border border-amber-500/40">
-                    DRAFT
+                  <span className="inline-block rounded-full bg-white/10 px-2 py-1 text-xs font-medium text-white/65 border border-white/20">
+                    Being finalized
                   </span>
                 </div>
               )}

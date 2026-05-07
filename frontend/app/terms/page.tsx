@@ -3,6 +3,7 @@ import PolicyPage from "@/app/(legal)/policy-page";
 
 export const metadata: Metadata = {
   title: "Terms of Service · Fan Engage",
+  robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
