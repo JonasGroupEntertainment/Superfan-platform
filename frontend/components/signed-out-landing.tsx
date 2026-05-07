@@ -71,6 +71,9 @@ export default function SignedOutLanding({
             <p className="mt-4 text-xs text-white/50">
               Free · 60 seconds · No credit card
             </p>
+            <p className="mt-2 text-xs font-medium text-aurora">
+              Join free and earn your first 100 fan points today.
+            </p>
           </div>
 
           {/* Hero visual — stylized preview card stack */}

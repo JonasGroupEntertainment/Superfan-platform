@@ -212,6 +212,11 @@ export default async function ArtistPage({
               {secondaryCta.label}
             </Link>
           </div>
+          {!isSignedIn && (
+            <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-aurora/30 bg-aurora/10 px-3 py-1 text-xs font-medium text-aurora">
+              🎁 Join free and earn your first 100 fan points today.
+            </p>
+          )}
           {!artist.heroImage && (
             <p className="mt-6 text-xs text-white/40">
               Hero imagery pending Box asset drop.
