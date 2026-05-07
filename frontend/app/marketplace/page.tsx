@@ -85,6 +85,7 @@ export default async function MarketplacePage() {
               ]}
               primaryCta="Sign up to redeem →"
               nextPath="/marketplace"
+              firstRewardLine="🎁 Earn your first 100 fan points the moment you sign up."
             />
           )}
 

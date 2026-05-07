@@ -16,6 +16,7 @@ export default function PreviewSignupBanner({
   bullets,
   primaryCta = "Sign up free →",
   nextPath,
+  firstRewardLine,
 }: {
   eyebrow: string;
   headline: string;
@@ -23,6 +24,13 @@ export default function PreviewSignupBanner({
   bullets?: string[];
   primaryCta?: string;
   nextPath?: string;
+  /**
+   * Optional small chip below the CTA row that surfaces the specific
+   * first-reward incentive (e.g. "🎁 Earn your first 100 fan points
+   * today"). Mirrors the chip on the home hero + signup form so the
+   * incentive language stays consistent across the funnel.
+   */
+  firstRewardLine?: string;
 }) {
   const signupHref = nextPath
     ? `/signup?next=${encodeURIComponent(nextPath)}`
@@ -67,6 +75,11 @@ export default function PreviewSignupBanner({
           Already a member? Sign in
         </Link>
       </div>
+      {firstRewardLine && (
+        <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-aurora/30 bg-aurora/10 px-3 py-1 text-xs font-medium text-aurora">
+          {firstRewardLine}
+        </p>
+      )}
     </section>
   );
 }

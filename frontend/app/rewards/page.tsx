@@ -108,6 +108,7 @@ export default async function RewardsPage() {
               ]}
               primaryCta="Sign up free →"
               nextPath="/rewards"
+              firstRewardLine="🎁 Earn your first 100 fan points the moment you sign up."
             />
           )}
 

@@ -71,6 +71,7 @@ export default async function ReferralsPage() {
               ]}
               primaryCta="Sign up free →"
               nextPath="/referrals"
+              firstRewardLine="🎁 Earn 150 bonus points the first time a friend joins."
             />
           )}
 
