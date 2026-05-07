@@ -5,17 +5,66 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function SignupForm({ referrerName }: { referrerName?: string | null }) {
+export type ReferrerArtist = {
+  slug: string;
+  name: string;
+  tagline: string | null;
+  accentFrom: string;
+  accentTo: string;
+};
+
+export function SignupForm({
+  referrerName,
+  referrerArtist,
+}: {
+  referrerName?: string | null;
+  referrerArtist?: ReferrerArtist | null;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const community = searchParams.get("community");
+  const ref = searchParams.get("ref");
+  // Where to send the user after a successful signup. Preserve any
+  // ?ref=<artist-slug> attribution from the artist-page Join CTA so the
+  // welcome flow knows which fan club they came from.
+  const onboardingHref = ref ? `/onboarding?ref=${encodeURIComponent(ref)}` : "/onboarding";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "confirm">("idle");
   const [message, setMessage] = useState("");
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function validateEmail(value: string): string | null {
+    if (!value.trim()) return "Email is required.";
+    if (!EMAIL_RE.test(value.trim())) return "Enter a valid email address.";
+    return null;
+  }
+
+  function validatePassword(value: string): string | null {
+    if (!value) return "Password is required.";
+    if (value.length < 8) return "Password must be at least 8 characters.";
+    return null;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Inline validation BEFORE we hit Supabase. Surface field-specific
+    // errors so a 6-character password isn't silently rejected as a
+    // generic "Unable to create account."
+    const eErr = validateEmail(email);
+    const pErr = validatePassword(password);
+    setEmailError(eErr);
+    setPasswordError(pErr);
+    if (eErr || pErr) {
+      setStatus("error");
+      setMessage("");
+      return;
+    }
+
     setStatus("loading");
     setMessage("");
     try {
@@ -24,7 +73,7 @@ export function SignupForm({ referrerName }: { referrerName?: string | null }) {
         email,
         password,
         options: {
-          emailRedirectTo: `${location.origin}/auth/callback?next=/onboarding`,
+          emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(onboardingHref)}`,
         },
       });
       if (error) throw error;
@@ -32,7 +81,7 @@ export function SignupForm({ referrerName }: { referrerName?: string | null }) {
       // If email confirmation is OFF in Supabase, Supabase returns a session here
       // and we can push straight into onboarding.
       if (data.session) {
-        router.push("/onboarding");
+        router.push(onboardingHref);
         router.refresh();
         return;
       }
@@ -46,20 +95,76 @@ export function SignupForm({ referrerName }: { referrerName?: string | null }) {
     }
   }
 
+  // Contextual hero: when a visitor arrives via /signup?ref=<artist-slug>
+  // and we successfully resolved that artist server-side, lead with the
+  // artist's name + accent gradient + 2-3 perks instead of generic copy.
+  // Falls through to the existing header below when there's no referrer.
+  const showContextualHero = !!referrerArtist;
+  const ctaGradient = referrerArtist
+    ? `linear-gradient(90deg, ${referrerArtist.accentFrom}, ${referrerArtist.accentTo})`
+    : null;
+
   return (
     <main className="mx-auto flex min-h-[80vh] max-w-md flex-col justify-center gap-6 px-6 py-12">
+      {showContextualHero && referrerArtist && ctaGradient && (
+        <section
+          className="relative overflow-hidden rounded-3xl border border-white/10 p-6"
+          style={{
+            backgroundImage: `linear-gradient(135deg, ${referrerArtist.accentFrom}33, #0f172a 60%, #000000)`,
+          }}
+        >
+          <p className="text-xs uppercase tracking-[0.3em] text-white/70">
+            Fan club
+          </p>
+          <h2
+            className="mt-2 text-2xl font-semibold"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Join {referrerArtist.name}&apos;s
+            {" "}
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: ctaGradient }}
+            >
+              fan club
+            </span>
+          </h2>
+          {referrerArtist.tagline && (
+            <p className="mt-2 text-sm text-white/75">{referrerArtist.tagline}</p>
+          )}
+          <ul className="mt-4 space-y-1.5 text-sm text-white/80">
+            <li className="flex items-start gap-2">
+              <span aria-hidden>🎁</span>
+              <span>Earn 100 fan points the moment you join</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span aria-hidden>🎟️</span>
+              <span>Backstage moments, drops, and early ticket access</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span aria-hidden>👋</span>
+              <span>Free · 60 seconds · No credit card</span>
+            </li>
+          </ul>
+        </section>
+      )}
+
       <div className="glass-card space-y-6 p-8">
         <div className="space-y-2">
           <p className="text-sm uppercase tracking-wide text-white/60">Fan Engage</p>
           <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-            Join the inner circle
+            {showContextualHero ? "Create your account" : "Join the inner circle"}
           </h1>
-          <p className="text-sm text-white/70">
-            Create an account to earn points, unlock rewards, and get backstage access.
-          </p>
-          <p className="inline-flex items-center gap-1.5 rounded-full border border-aurora/30 bg-aurora/10 px-3 py-1 text-xs font-medium text-aurora">
-            🎁 Join free and earn your first 100 fan points today.
-          </p>
+          {!showContextualHero && (
+            <p className="text-sm text-white/70">
+              Create an account to earn points, unlock rewards, and get backstage access.
+            </p>
+          )}
+          {!showContextualHero && (
+            <p className="inline-flex items-center gap-1.5 rounded-full border border-aurora/30 bg-aurora/10 px-3 py-1 text-xs font-medium text-aurora">
+              🎁 Join free and earn your first 100 fan points today.
+            </p>
+          )}
           {referrerName && (
             <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-200">
               <span aria-hidden>👋</span>
@@ -87,7 +192,7 @@ export function SignupForm({ referrerName }: { referrerName?: string | null }) {
             redirect URIs point at the new domain. The original block
             in git history at the commit before this one. */}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <label className="block space-y-1">
             <span className="text-xs uppercase tracking-wide text-white/60">Email</span>
             <input
@@ -95,10 +200,23 @@ export function SignupForm({ referrerName }: { referrerName?: string | null }) {
               required
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-white/40 focus:outline-none"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) setEmailError(validateEmail(e.target.value));
+              }}
+              onBlur={() => setEmailError(validateEmail(email))}
+              aria-invalid={!!emailError}
+              className={
+                "w-full rounded-2xl border bg-black/40 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none " +
+                (emailError
+                  ? "border-rose-500/60 focus:border-rose-400"
+                  : "border-white/10 focus:border-white/40")
+              }
               placeholder="you@email.com"
             />
+            {emailError && (
+              <span className="text-[11px] text-rose-300">{emailError}</span>
+            )}
           </label>
           <label className="block space-y-1">
             <span className="text-xs uppercase tracking-wide text-white/60">Password</span>
@@ -108,11 +226,24 @@ export function SignupForm({ referrerName }: { referrerName?: string | null }) {
               minLength={8}
               autoComplete="new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-white/40 focus:outline-none"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (passwordError) setPasswordError(validatePassword(e.target.value));
+              }}
+              onBlur={() => setPasswordError(validatePassword(password))}
+              aria-invalid={!!passwordError}
+              className={
+                "w-full rounded-2xl border bg-black/40 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none " +
+                (passwordError
+                  ? "border-rose-500/60 focus:border-rose-400"
+                  : "border-white/10 focus:border-white/40")
+              }
               placeholder="at least 8 characters"
             />
-            {password && (() => {
+            {passwordError && (
+              <span className="text-[11px] text-rose-300">{passwordError}</span>
+            )}
+            {password && !passwordError && (() => {
               let score = 0;
               if (password.length >= 8) score += 1;
               if (password.length >= 12) score += 1;

@@ -117,7 +117,7 @@ export default async function ArtistPage({
   // - signed in, no profile → "Complete profile" → /onboarding?ref=<slug>
   // - signed in, profile done → "Shop drops" → /marketplace
   const primaryCta = !isSignedIn
-    ? { label: "Join the fan club", href: `/onboarding?ref=${artist.slug}` }
+    ? { label: "Join the fan club", href: `/signup?ref=${artist.slug}` }
     : needsProfile
       ? { label: "Complete your profile", href: `/onboarding?ref=${artist.slug}` }
       : { label: "Shop drops", href: "/marketplace" };
