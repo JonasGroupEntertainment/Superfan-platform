@@ -4,35 +4,11 @@ import type { WeeklyRecap } from "@/lib/personal-recap/types";
 import PushOptInBanner from "@/components/push-opt-in-banner";
 import StreakTile from "@/components/streak-tile";
 import type { FanHomeData, FanHomeUpcomingEvent } from "@/lib/data/fan-home";
+import { focalPointStyle } from "@/lib/images/focal-point";
 
-/**
- * Per-artist photo override for the Following strip card.
- *
- * `focalY` controls object-position (0% = top-anchored, 100% = bottom).
- * `transform` + `transformOrigin` let us zoom into a specific area of
- * the source photo when object-position alone can't lift the subject
- * enough — e.g. RaeLynn's lake photo, where she sits in the lower-
- * middle of a 1281x1920 portrait and the 3:4 strip crop only nibbles
- * 11% off the top.
- */
-type StripPhotoOverride = {
-  focalY?: number;
-  transform?: string;
-  transformOrigin?: string;
-};
-const STRIP_PHOTO_OVERRIDES: Record<string, StripPhotoOverride> = {
-  raelynn: {
-    // The previous override (scale 1.6 + transformOrigin "25% bottom")
-    // was tuned for an earlier lake photo where RaeLynn sat in the
-    // left third. The current avatar-style photo is a closer crop
-    // with her face roughly centered, so the aggressive zoom-to-
-    // corner logic was fighting the composition. Drop the transform
-    // and let object-position with a top-leaning focal point keep
-    // her face in view.
-    focalY: 25,
-  },
-};
-const STRIP_DEFAULT_FOCAL_Y = 0;
+// Strip-card focal point now comes from artists.hero_focal_x /
+// .hero_focal_y (migration 0035), exposed on FanHomeFollowedArtist
+// directly. focalPointStyle() falls back to 50/50 when not set.
 
 
 /**
@@ -155,24 +131,14 @@ function FollowedArtistsStrip({
               {a.hero_image ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {(() => {
-                    const o = STRIP_PHOTO_OVERRIDES[a.slug] ?? {};
-                    const focalY = o.focalY ?? STRIP_DEFAULT_FOCAL_Y;
-                    return (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={a.hero_image}
-                        alt=""
-                        style={{
-                          objectPosition: `center ${focalY}%`,
-                          ...(o.transform && { transform: o.transform }),
-                          ...(o.transformOrigin && { transformOrigin: o.transformOrigin }),
-                        }}
-                        className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
-                        aria-hidden
-                      />
-                    );
-                  })()}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={a.hero_image}
+                    alt=""
+                    style={focalPointStyle(a)}
+                    className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+                    aria-hidden
+                  />
                 </>
               ) : (
                 // Fallback when no hero is uploaded yet — accent gradient stand-in.

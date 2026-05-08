@@ -9,6 +9,8 @@ export interface FanHomeFollowedArtist {
   accent_from: string;
   accent_to: string;
   hero_image: string | null;
+  hero_focal_x: number | null;
+  hero_focal_y: number | null;
 }
 
 /**
@@ -144,7 +146,7 @@ export async function getFanHomeData(): Promise<FanHomeData | null> {
   const artistsPromise = followedSlugs.length
     ? admin
         .from("artists")
-        .select("slug, name, tagline, accent_from, accent_to, hero_image")
+        .select("slug, name, tagline, accent_from, accent_to, hero_image, hero_focal_x, hero_focal_y")
         .in("slug", followedSlugs)
         .eq("active", true)
     : Promise.resolve({ data: [] as Array<{
@@ -154,6 +156,8 @@ export async function getFanHomeData(): Promise<FanHomeData | null> {
         accent_from: string;
         accent_to: string;
         hero_image: string | null;
+        hero_focal_x: number | null;
+        hero_focal_y: number | null;
       }> });
 
   // Upcoming public-tier events from followed artists. Discovery-style:

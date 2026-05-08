@@ -18,28 +18,12 @@ import FollowButton from "./follow-button";
 import ShareButton from "@/components/share-button";
 import RsvpButton from "./rsvp-button";
 import { ExpandableEventGrid } from "./expandable-event-grid";
+import { focalPointStyle } from "@/lib/images/focal-point";
 
 
-/**
- * Per-artist hero focal-point overrides (vertical %).
- *
- * The default is 30 — biased toward the upper third of the photo so
- * portrait subjects' faces stay visible in the wide hero. Some photos
- * have the subject framed lower (e.g. waist-up vs head-and-shoulders);
- * those need a higher value to bring the face into the visible band.
- *
- * This is a tactical patch. The proper fix — an admin-editable
- * `hero_focal_y` column + slider in /admin/artists/[slug] — is logged
- * in LAUNCH_CHECKLIST.md under the post-launch backlog.
- */
-const HERO_FOCAL_Y_BY_SLUG: Record<string, number> = {
-  "hunter-hawkins": 90,
-  // New hero photo (lake + cabins) places RaeLynn low in the frame.
-  // 55 = midpoint between the default 30 (head too low) and 75 (head
-  // cropped at top). Adjust by ~5 if you want more or less headroom.
-  "raelynn": 30,
-};
-const DEFAULT_HERO_FOCAL_Y = 30;
+// Per-artist hero focal-point now comes from artists.hero_focal_x /
+// .hero_focal_y (migration 0035), exposed on Artist via heroFocalX /
+// heroFocalY. focalPointStyle() falls back to 50/50 when not set.
 
 export const dynamic = "force-dynamic";
 
@@ -142,15 +126,10 @@ export default async function ArtistPage({
             <img
               src={artist.heroImage}
               alt=""
-              // Bias the focal point to ~30% from the top so portrait artist
-              // photos keep the face visible in this wide hero. The default
-              // `object-position: center` (50%) crops too low (slices heads
-              // off the top); `object-top` (0%) crops too high (shows only
-              // sky/background above the subject). 30% lands around the
-              // upper-mid of most portrait photos where faces sit. If a
-              // specific artist's photo needs different framing, consider
-              // adding a per-artist `hero_focal_y` column.
-              style={{ objectPosition: `center ${HERO_FOCAL_Y_BY_SLUG[artist.slug] ?? DEFAULT_HERO_FOCAL_Y}%` }}
+              // Focal point comes from artists.hero_focal_x / .hero_focal_y.
+              // Default 50/50 (centered) when not set. Tweak via Supabase
+              // SQL editor or (Phase 2) the admin focal-point picker.
+              style={focalPointStyle(artist)}
               className="absolute inset-0 h-full w-full object-cover"
               aria-hidden
             />
