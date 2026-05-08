@@ -24,11 +24,12 @@ const STRIP_PHOTO_OVERRIDES: Record<string, StripPhotoOverride> = {
   raelynn: {
     focalY: 100,
     transform: "scale(1.6)",
-    // RaeLynn sits in the left third of the photo, so anchor the
-    // zoom to the bottom-left to slide the visible window over to
-    // where she actually is — otherwise the centered zoom leaves her
-    // hugging the left edge of the card.
-    transformOrigin: "25% bottom",
+    // RaeLynn sits in the left third of the photo, with her face in
+    // the upper-mid region and lower body toward the bottom. Anchor
+    // the zoom near her face — 20% from left, 35% from top — so the
+    // visible window covers her head and shoulders rather than just
+    // her chest/jewelry.
+    transformOrigin: "20% 35%",
   },
 };
 const STRIP_DEFAULT_FOCAL_Y = 0;
