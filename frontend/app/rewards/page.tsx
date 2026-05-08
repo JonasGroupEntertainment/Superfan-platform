@@ -251,7 +251,6 @@ export default async function RewardsPage() {
             <AvatarUploadCard
               initialUrl={fan?.avatar_url ?? null}
               firstName={fan?.first_name ?? null}
-              email={fan?.email ?? null}
             />
           )}
 
