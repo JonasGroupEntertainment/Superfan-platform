@@ -29,7 +29,7 @@ const STRIP_PHOTO_OVERRIDES: Record<string, StripPhotoOverride> = {
     // the zoom near her face — 20% from left, 35% from top — so the
     // visible window covers her head and shoulders rather than just
     // her chest/jewelry.
-    transformOrigin: "20% 35%",
+    transformOrigin: "30% 35%",
   },
 };
 const STRIP_DEFAULT_FOCAL_Y = 0;
