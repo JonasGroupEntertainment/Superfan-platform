@@ -31,7 +31,7 @@ export default async function AdminArtistEditPage({
   const admin = createAdminClient();
   const { data: artist } = await admin
     .from("artists")
-    .select("slug, name, tagline, bio, hero_image, accent_from, accent_to, genres, social, active, sort_order")
+    .select("slug, name, tagline, bio, hero_image, hero_focal_x, hero_focal_y, accent_from, accent_to, genres, social, active, sort_order")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -92,6 +92,8 @@ export default async function AdminArtistEditPage({
           tagline: (artist.tagline as string | null) ?? "",
           bio: (artist.bio as string | null) ?? "",
           heroImage: (artist.hero_image as string | null) ?? null,
+          heroFocalX: (artist.hero_focal_x as number | null) ?? 50,
+          heroFocalY: (artist.hero_focal_y as number | null) ?? 50,
           accentFrom: (artist.accent_from as string) ?? "#7c3aed",
           accentTo: (artist.accent_to as string) ?? "#f97316",
           genresText,
