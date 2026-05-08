@@ -22,14 +22,14 @@ type StripPhotoOverride = {
 };
 const STRIP_PHOTO_OVERRIDES: Record<string, StripPhotoOverride> = {
   raelynn: {
-    focalY: 100,
-    transform: "scale(1.6)",
-    // RaeLynn sits in the left third of the photo, with her face in
-    // the upper-mid region and lower body toward the bottom. Anchor
-    // the zoom near her face — 20% from left, 35% from top — so the
-    // visible window covers her head and shoulders rather than just
-    // her chest/jewelry.
-    transformOrigin: "30% 35%",
+    // The previous override (scale 1.6 + transformOrigin "25% bottom")
+    // was tuned for an earlier lake photo where RaeLynn sat in the
+    // left third. The current avatar-style photo is a closer crop
+    // with her face roughly centered, so the aggressive zoom-to-
+    // corner logic was fighting the composition. Drop the transform
+    // and let object-position with a top-leaning focal point keep
+    // her face in view.
+    focalY: 25,
   },
 };
 const STRIP_DEFAULT_FOCAL_Y = 0;
