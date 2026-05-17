@@ -115,11 +115,11 @@ export default function ApplicationActions({
         onSubmit={submitApprove}
         className="rounded-xl border border-emerald-400/30 bg-emerald-500/5 p-3 space-y-2"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-200">
+        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-200">
           Approve {displayName}
         </p>
         <div>
-          <label className="block text-[10px] uppercase tracking-wide text-white/55">
+          <label className="block text-xs uppercase tracking-wide text-white/55">
             Approved slug (kebab-case, becomes /artists/&lt;slug&gt;)
           </label>
           <input
@@ -132,7 +132,7 @@ export default function ApplicationActions({
           />
         </div>
         <div>
-          <label className="block text-[10px] uppercase tracking-wide text-white/55">
+          <label className="block text-xs uppercase tracking-wide text-white/55">
             Notes (optional — included in Slack + invite email)
           </label>
           <textarea
@@ -160,7 +160,7 @@ export default function ApplicationActions({
             Cancel
           </button>
           {error && (
-            <span className="text-[11px] text-rose-300">⚠ {error}</span>
+            <span className="text-xs text-rose-300">⚠ {error}</span>
           )}
         </div>
       </form>
@@ -173,11 +173,11 @@ export default function ApplicationActions({
       onSubmit={submitReject}
       className="rounded-xl border border-rose-400/30 bg-rose-500/5 p-3 space-y-2"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-200">
+      <p className="text-xs font-semibold uppercase tracking-wide text-rose-200">
         Reject {displayName}
       </p>
       <div>
-        <label className="block text-[10px] uppercase tracking-wide text-white/55">
+        <label className="block text-xs uppercase tracking-wide text-white/55">
           Reason (optional — Slack-internal, not sent to applicant)
         </label>
         <textarea
@@ -205,7 +205,7 @@ export default function ApplicationActions({
           Cancel
         </button>
         {error && (
-          <span className="text-[11px] text-rose-300">⚠ {error}</span>
+          <span className="text-xs text-rose-300">⚠ {error}</span>
         )}
       </div>
     </form>

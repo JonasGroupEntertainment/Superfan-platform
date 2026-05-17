@@ -48,10 +48,10 @@ export default function RecommendedRewardCard({
         {/* Body */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white">
+            <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs uppercase tracking-wide text-white">
               ✨ For you
             </span>
-            <span className="text-[10px] uppercase tracking-wide text-white/50">
+            <span className="text-xs uppercase tracking-wide text-white/50">
               {reward.point_cost.toLocaleString()} pts
             </span>
           </div>
@@ -66,7 +66,7 @@ export default function RecommendedRewardCard({
               {reward.description}
             </p>
           ) : null}
-          <p className="mt-2 text-[11px] italic text-white/50">
+          <p className="mt-2 text-xs italic text-white/50">
             {reasonCopy(reward)}
           </p>
         </div>
@@ -81,7 +81,7 @@ export default function RecommendedRewardCard({
           </Link>
           <Link
             href={dismissHref}
-            className="text-[11px] text-white/50 hover:text-white"
+            className="text-xs text-white/50 hover:text-white"
           >
             Hide
           </Link>

@@ -289,7 +289,7 @@ export default async function ArtistPage({
                       {e.date}
                     </p>
                     {eventId && (
-                      <p className="mt-1 text-[11px] text-white/50">
+                      <p className="mt-1 text-xs text-white/50">
                         {count}
                         {e.capacity ? ` / ${e.capacity}` : ""} RSVPed
                       </p>
@@ -305,7 +305,7 @@ export default async function ArtistPage({
                   )}
                 </div>
                 {eventId && (
-                  <div className="mt-3 flex items-center gap-3 text-[11px]">
+                  <div className="mt-3 flex items-center gap-3 text-xs">
                     <a
                       href={`/api/events/${eventId}/ics`}
                       className="text-white/60 hover:text-white"

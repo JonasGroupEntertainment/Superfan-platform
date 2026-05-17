@@ -206,7 +206,7 @@ function CandidatesTable({ log }: { log: LogRow[] }) {
             >
               <td className="px-3 py-2 text-white">
                 {r.fan.first_name ?? "—"}
-                <div className="text-[10px] text-white/40">
+                <div className="text-xs text-white/40">
                   {r.fan.email ?? ""}
                 </div>
               </td>
@@ -231,15 +231,15 @@ function CandidatesTable({ log }: { log: LogRow[] }) {
               </td>
               <td className="px-3 py-2">
                 {r.sent_at ? (
-                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] text-emerald-300">
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">
                     sent · {r.channels_sent.join("+") || "—"}
                   </span>
                 ) : r.is_candidate ? (
-                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300">
+                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300">
                     ready
                   </span>
                 ) : (
-                  <span className="text-[10px] text-white/40">below cap</span>
+                  <span className="text-xs text-white/40">below cap</span>
                 )}
               </td>
             </tr>

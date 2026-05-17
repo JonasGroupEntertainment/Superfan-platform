@@ -229,7 +229,7 @@ export default async function FanProfilePage({
                     {b.description}
                   </p>
                 )}
-                <p className="mt-3 text-[11px] text-white/45">
+                <p className="mt-3 text-xs text-white/45">
                   Earned{" "}
                   {new Date(b.earnedAt).toLocaleDateString("en-US", {
                     month: "short",

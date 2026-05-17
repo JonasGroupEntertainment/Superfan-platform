@@ -36,13 +36,13 @@ export default function EditableEventRow({
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="inline-flex text-[11px] text-white/60 hover:text-white"
+            className="inline-flex text-xs text-white/60 hover:text-white"
           >
             ✏️ Edit
           </button>
           <a
             href={`/admin/artists/${artistSlug}/events/${event.id}/match`}
-            className="inline-flex text-[11px] text-white/60 hover:text-white"
+            className="inline-flex text-xs text-white/60 hover:text-white"
           >
             🎯 Match preview
           </a>

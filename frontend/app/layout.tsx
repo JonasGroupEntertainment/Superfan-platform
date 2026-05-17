@@ -201,7 +201,7 @@ export default async function RootLayout({
                 >
                   <span aria-hidden>🔔</span>
                   {unread > 0 && (
-                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-gradient-to-r from-aurora to-ember px-1 text-[10px] font-semibold text-white shadow">
+                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-gradient-to-r from-aurora to-ember px-1 text-xs font-semibold text-white shadow">
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}

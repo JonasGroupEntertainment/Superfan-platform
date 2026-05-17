@@ -110,28 +110,28 @@ export default function PredictionCard({
     <article className="relative overflow-hidden rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/5 to-rose-500/10 p-5">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-violet-500/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-violet-200">
+          <span className="rounded-full bg-violet-500/25 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-violet-200">
             🔮 Prediction
           </span>
           {phase === "open" && secondsLeft !== null && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-200">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-200">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" aria-hidden />
               Closes in {formatPredictionCountdown(secondsLeft)}
             </span>
           )}
           {phase === "closed" && (
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/70">
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/70">
               Awaiting result
             </span>
           )}
           {phase === "resolved" && (
-            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-200">
+            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-200">
               ✓ Resolved
             </span>
           )}
         </div>
         {post.points_for_correct ? (
-          <span className="text-[11px] font-semibold text-white/70">
+          <span className="text-xs font-semibold text-white/70">
             +{post.points_for_correct.toLocaleString()} pts
           </span>
         ) : null}
@@ -218,7 +218,7 @@ export default function PredictionCard({
         })}
       </ul>
 
-      <p className="mt-3 text-[11px] text-white/55">
+      <p className="mt-3 text-xs text-white/55">
         {totalVotes.toLocaleString()} vote{totalVotes === 1 ? "" : "s"}
         {phase === "resolved" && post.points_for_correct
           ? ` · winners earned +${post.points_for_correct} pts`
@@ -228,7 +228,7 @@ export default function PredictionCard({
       {/* Admin resolution panel — only renders when admin viewing & not yet resolved */}
       {viewerIsAdmin && phase !== "resolved" && (
         <div className="mt-4 rounded-xl border border-amber-300/20 bg-amber-500/5 p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-200">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-200">
             Admin · resolve prediction
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">

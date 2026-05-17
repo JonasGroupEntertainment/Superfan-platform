@@ -215,7 +215,7 @@ export function SignupForm({
               placeholder="you@email.com"
             />
             {emailError && (
-              <span className="text-[11px] text-rose-300">{emailError}</span>
+              <span className="text-xs text-rose-300">{emailError}</span>
             )}
           </label>
           <label className="block space-y-1">
@@ -241,7 +241,7 @@ export function SignupForm({
               placeholder="at least 8 characters"
             />
             {passwordError && (
-              <span className="text-[11px] text-rose-300">{passwordError}</span>
+              <span className="text-xs text-rose-300">{passwordError}</span>
             )}
             {password && !passwordError && (() => {
               let score = 0;
@@ -264,7 +264,7 @@ export function SignupForm({
                   <span className="h-1 flex-1 overflow-hidden rounded bg-white/10">
                     <span className={"block h-1 " + t.color} style={{ width: t.w }} />
                   </span>
-                  <span className="text-[11px] text-white/50">{t.label}</span>
+                  <span className="text-xs text-white/50">{t.label}</span>
                 </div>
               );
             })()}
@@ -310,7 +310,7 @@ export function SignupForm({
           </p>
         )}
 
-        <p className="text-center text-[11px] text-white/40">
+        <p className="text-center text-xs text-white/40">
           By creating an account, you agree to our{" "}
           <Link href="/terms" className="underline-offset-4 hover:underline hover:text-white/60">
             Terms

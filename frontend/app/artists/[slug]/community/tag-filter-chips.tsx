@@ -86,7 +86,7 @@ function Chip({
     <button type="button" onClick={onClick} className={`${base} ${cls}`}>
       <span>{label}</span>
       {typeof count === "number" && count > 0 && (
-        <span className="text-[10px] text-white/50">{count}</span>
+        <span className="text-xs text-white/50">{count}</span>
       )}
     </button>
   );

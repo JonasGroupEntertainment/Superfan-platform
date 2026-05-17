@@ -274,7 +274,7 @@ export default function SearchInput({
             >
               <span
                 className={
-                  "mt-0.5 inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] tracking-widest " +
+                  "mt-0.5 inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-xs tracking-widest " +
                   CATEGORY_COLOR[r.category]
                 }
               >

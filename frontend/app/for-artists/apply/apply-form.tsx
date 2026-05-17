@@ -122,7 +122,7 @@ export default function ApplyForm() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[11px] text-white/45">
+        <p className="text-xs text-white/45">
           Required fields are marked with *. We never share your data
           with third parties.
         </p>
@@ -169,7 +169,7 @@ function Field({
         {required && <span className="ml-1 text-aurora" aria-hidden>*</span>}
       </span>
       {hint && (
-        <span className="mt-0.5 block text-[11px] text-white/45">{hint}</span>
+        <span className="mt-0.5 block text-xs text-white/45">{hint}</span>
       )}
       {textarea ? (
         <textarea
