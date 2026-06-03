@@ -116,6 +116,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Run on everything except static assets / image optimization / favicon.
+    // Note: api/fan-engage is explicitly excluded here — rate limiting is
+    // handled at the route level (route.ts files) instead.
     "/((?!_next/static|_next/image|favicon.ico|api/fan-engage).*)",
   ],
 };

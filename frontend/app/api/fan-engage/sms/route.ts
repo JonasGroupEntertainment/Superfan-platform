@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import twilio from "twilio";
+import { fanDataRateLimiter, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -14,7 +15,31 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
 const defaultFrom = process.env.TWILIO_DEFAULT_FROM;
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const clientIp = getClientIp(request.headers);
+  const rateLimitResult = fanDataRateLimiter.check(clientIp);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      {
+        error: "Too many SMS requests. Please try again later.",
+        retryAfter: Math.ceil(
+          (rateLimitResult.resetTime.getTime() - Date.now()) / 1000,
+        ),
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.ceil(
+            (rateLimitResult.resetTime.getTime() - Date.now()) / 1000,
+          ).toString(),
+          "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+          "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+          "X-RateLimit-Reset": rateLimitResult.resetTime.toISOString(),
+        },
+      },
+    );
+  }
   if (!accountSid || !authToken || (!messagingServiceSid && !defaultFrom)) {
     return NextResponse.json(
       { error: "Twilio credentials are not configured" },
