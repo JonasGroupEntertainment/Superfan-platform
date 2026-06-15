@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { gatherArtistLeaderboard } from "@/lib/leaderboard/gather";
 import LeaderboardPodium from "@/components/leaderboard-podium";
 import LeaderboardList from "@/components/leaderboard-list";
+import ShareButton from "@/components/share-button";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -117,6 +118,19 @@ export default async function LeaderboardPage({
                 with activity this month.
               </p>
             </section>
+          )}
+
+          {/* Share your rank — visible to any signed-in fan on the board */}
+          {viewerOnBoard && board.viewerEntry && (
+            <div className="mt-6 flex justify-center">
+              <ShareButton
+                title={`I'm #${board.viewerEntry.rank} on the ${board.artistName} leaderboard`}
+                text={`I'm ranked #${board.viewerEntry.rank} on the ${board.artistName} fan leaderboard this month on Fan Engage 🎵`}
+                url={`${process.env.NEXT_PUBLIC_APP_URL ?? ""}/artists/${slug}/leaderboard`}
+                label="Share your rank"
+                variant="ghost"
+              />
+            </div>
           )}
         </>
       )}
