@@ -1,0 +1,323 @@
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAdminContext } from "@/lib/admin";
+import { getStripeOrNull } from "@/lib/stripe";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import {
+  createConnectOnboardingLinkAction,
+  updatePayoutSplitAction,
+  updatePricingAction,
+  syncConnectStatusAction,
+} from "./actions";
+
+export const dynamic = "force-dynamic";
+
+function fmtUSD(cents: number) {
+  return "$" + (cents / 100).toFixed(2);
+}
+
+function StatusBadge({ complete, accountId }: { complete: boolean; accountId: string | null }) {
+  if (!accountId) {
+    return (
+      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
+        Not started
+      </span>
+    );
+  }
+  if (complete) {
+    return (
+      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">
+        ✓ Payouts enabled
+      </span>
+    );
+  }
+  return (
+    <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300">
+      ⏳ Onboarding incomplete
+    </span>
+  );
+}
+
+export default async function StripeConnectPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ onboarded?: string; refresh?: string }>;
+}) {
+  const ctx = await getAdminContext();
+  if (!ctx?.isSuperAdmin) redirect("/admin");
+
+  const params = (await searchParams) ?? {};
+
+  const admin = createAdminClient();
+  const { data: communities } = await admin
+    .from("communities")
+    .select(
+      "slug, display_name, active, monthly_price_cents, annual_price_cents, " +
+      "stripe_connect_account_id, stripe_connect_onboarding_complete, payout_split_pct, " +
+      "stripe_product_id",
+    )
+    .order("display_name");
+
+  const rows = ((communities ?? []) as unknown) as Array<{
+    slug: string;
+    display_name: string;
+    active: boolean;
+    monthly_price_cents: number;
+    annual_price_cents: number;
+    stripe_connect_account_id: string | null;
+    stripe_connect_onboarding_complete: boolean;
+    payout_split_pct: number;
+    stripe_product_id: string | null;
+  }>;
+
+  // Pull live subscriber counts from Supabase (faster than Stripe API)
+  const { data: memberCounts } = await admin
+    .from("fan_community_memberships")
+    .select("community_id")
+    .in("subscription_tier", ["premium", "past_due", "comped"]);
+
+  const countByCommunity: Record<string, number> = {};
+  for (const m of memberCounts ?? []) {
+    countByCommunity[m.community_id] = (countByCommunity[m.community_id] ?? 0) + 1;
+  }
+
+  const stripeConfigured = Boolean(getStripeOrNull());
+
+  return (
+    <div className="space-y-8 px-4 py-10 max-w-5xl mx-auto">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <Link href="/admin" className="text-xs uppercase tracking-widest text-white/50 hover:text-white">
+            ← Admin
+          </Link>
+          <h1 className="mt-3 text-2xl font-semibold text-white">Stripe — Financial Setup</h1>
+          <p className="mt-1 text-sm text-white/60">
+            Connect artist bank accounts, set subscription pricing, and track revenue splits.
+          </p>
+        </div>
+        <Link
+          href="/admin/stripe/seed"
+          className="rounded-full border border-white/20 px-4 py-2 text-xs text-white/70 hover:bg-white/10"
+        >
+          Stripe product seed →
+        </Link>
+      </header>
+
+      {!stripeConfigured && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+          <strong>STRIPE_SECRET_KEY not set.</strong> Add it in Vercel → Settings → Environment Variables, then redeploy.
+        </div>
+      )}
+
+      {params.onboarded && (
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+          ✓ Stripe onboarding complete for <strong>{params.onboarded}</strong>. Sync status below to confirm payouts are enabled.
+        </div>
+      )}
+
+      {params.refresh && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+          Onboarding session expired for <strong>{params.refresh}</strong>. Generate a new link below to continue.
+        </div>
+      )}
+
+      {/* Summary MRR bar */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {[
+          {
+            label: "Communities",
+            value: rows.length,
+            sub: `${rows.filter((r) => r.active).length} active`,
+          },
+          {
+            label: "Total subscribers",
+            value: Object.values(countByCommunity).reduce((a, b) => a + b, 0),
+            sub: "across all communities",
+          },
+          {
+            label: "Est. MRR",
+            value: fmtUSD(
+              rows.reduce((sum, r) => {
+                const subs = countByCommunity[r.slug] ?? 0;
+                return sum + subs * r.monthly_price_cents;
+              }, 0),
+            ),
+            sub: "assumes monthly billing",
+          },
+          {
+            label: "Connect accounts",
+            value: rows.filter((r) => r.stripe_connect_onboarding_complete).length,
+            sub: `of ${rows.length} fully onboarded`,
+          },
+        ].map(({ label, value, sub }) => (
+          <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <p className="text-2xl font-bold text-white">{value}</p>
+            <p className="mt-0.5 text-xs uppercase tracking-wide text-white/50">{label}</p>
+            <p className="mt-1 text-xs text-white/40">{sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Per-community cards */}
+      <div className="space-y-6">
+        {rows.map((c) => {
+          const subs = countByCommunity[c.slug] ?? 0;
+          const mrr = subs * c.monthly_price_cents;
+          const artistShare = Math.round(mrr * (1 - c.payout_split_pct / 100));
+
+          return (
+            <div
+              key={c.slug}
+              className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-6"
+            >
+              {/* Header row */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-white">{c.display_name}</h2>
+                  <p className="text-xs text-white/50">{c.slug}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!c.active && (
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/40">Inactive</span>
+                  )}
+                  <StatusBadge
+                    complete={c.stripe_connect_onboarding_complete}
+                    accountId={c.stripe_connect_account_id}
+                  />
+                </div>
+              </div>
+
+              {/* Revenue snapshot */}
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="rounded-xl bg-white/5 p-3">
+                  <p className="text-lg font-bold text-white">{subs}</p>
+                  <p className="text-xs text-white/50">Subscribers</p>
+                </div>
+                <div className="rounded-xl bg-white/5 p-3">
+                  <p className="text-lg font-bold text-white">{fmtUSD(mrr)}</p>
+                  <p className="text-xs text-white/50">Est. MRR</p>
+                </div>
+                <div className="rounded-xl bg-emerald-500/10 p-3">
+                  <p className="text-lg font-bold text-emerald-300">{fmtUSD(artistShare)}</p>
+                  <p className="text-xs text-white/50">Artist share / mo</p>
+                </div>
+              </div>
+
+              {/* Pricing edit */}
+              <details className="group">
+                <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-white/60 hover:text-white list-none flex items-center gap-2">
+                  <span className="group-open:rotate-90 inline-block transition-transform">▶</span>
+                  Edit pricing — current: {fmtUSD(c.monthly_price_cents)}/mo · {fmtUSD(c.annual_price_cents)}/yr
+                </summary>
+                <form action={updatePricingAction} className="mt-4 flex flex-wrap items-end gap-3">
+                  <input type="hidden" name="community_id" value={c.slug} />
+                  <div>
+                    <label className="block text-xs text-white/60 mb-1">Monthly (cents)</label>
+                    <input
+                      name="monthly_price_cents"
+                      type="number"
+                      min={100}
+                      defaultValue={c.monthly_price_cents}
+                      className="w-28 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/60 mb-1">Annual (cents)</label>
+                    <input
+                      name="annual_price_cents"
+                      type="number"
+                      min={100}
+                      defaultValue={c.annual_price_cents}
+                      className="w-28 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white hover:bg-white/20"
+                  >
+                    Save prices
+                  </button>
+                  <p className="w-full text-xs text-white/40">
+                    Saves to DB only — existing subscribers keep their current Stripe price.
+                    Run <Link href="/admin/stripe/seed" className="underline">Stripe seed</Link> after to push new Prices to Stripe.
+                  </p>
+                </form>
+              </details>
+
+              {/* Payout split edit */}
+              <details className="group">
+                <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-white/60 hover:text-white list-none flex items-center gap-2">
+                  <span className="group-open:rotate-90 inline-block transition-transform">▶</span>
+                  Revenue split — platform keeps {c.payout_split_pct}%, artist receives {100 - c.payout_split_pct}%
+                </summary>
+                <form action={updatePayoutSplitAction} className="mt-4 flex flex-wrap items-end gap-3">
+                  <input type="hidden" name="community_id" value={c.slug} />
+                  <div>
+                    <label className="block text-xs text-white/60 mb-1">Platform % (0–100)</label>
+                    <input
+                      name="payout_split_pct"
+                      type="number"
+                      min={0}
+                      max={100}
+                      defaultValue={c.payout_split_pct}
+                      className="w-20 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white hover:bg-white/20"
+                  >
+                    Save split
+                  </button>
+                </form>
+              </details>
+
+              {/* Connect onboarding */}
+              <div className="border-t border-white/10 pt-5 space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/60">
+                  Artist bank account (Stripe Connect)
+                </p>
+                {c.stripe_connect_account_id && (
+                  <p className="text-xs text-white/40 font-mono">
+                    Account: {c.stripe_connect_account_id}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-3">
+                  {stripeConfigured && (
+                    <form action={createConnectOnboardingLinkAction}>
+                      <input type="hidden" name="community_id" value={c.slug} />
+                      <button
+                        type="submit"
+                        className="rounded-full bg-gradient-to-r from-aurora to-ember px-4 py-2 text-xs font-semibold text-white hover:brightness-110"
+                      >
+                        {c.stripe_connect_account_id
+                          ? "Generate new onboarding link"
+                          : "Set up artist bank account →"}
+                      </button>
+                    </form>
+                  )}
+                  {c.stripe_connect_account_id && (
+                    <form action={syncConnectStatusAction}>
+                      <input type="hidden" name="community_id" value={c.slug} />
+                      <button
+                        type="submit"
+                        className="rounded-full border border-white/20 px-4 py-2 text-xs text-white/70 hover:bg-white/10"
+                      >
+                        Sync status from Stripe
+                      </button>
+                    </form>
+                  )}
+                </div>
+                {!c.stripe_connect_onboarding_complete && c.stripe_connect_account_id && (
+                  <p className="text-xs text-amber-300/70">
+                    Share the onboarding link with the artist — they'll enter their bank details directly in Stripe's secure flow. You'll see "Payouts enabled" here once complete.
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
