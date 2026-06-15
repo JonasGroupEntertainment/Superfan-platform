@@ -50,6 +50,27 @@ export default async function AdminOverviewPage() {
           </div>
         ))}
       </div>
+
+      {/* Quick links to key admin sections */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[
+          { label: "💳 Stripe — financial setup", href: "/admin/stripe/connect", desc: "Pricing, artist payouts, MRR" },
+          { label: "🎨 Artists", href: "/admin/artists", desc: "Manage artist communities" },
+          { label: "🏆 Campaigns", href: "/admin/campaigns", desc: "Email & SMS blasts" },
+          { label: "📥 Import fans", href: "/admin/fans/import", desc: "Upload CSV with email / phone / socials" },
+          { label: "📋 Policies", href: "/admin/policies", desc: "ToS, Privacy, Cookie" },
+          { label: "🛡️ Moderation", href: "/admin/community", desc: "Review flagged posts & comments" },
+        ].map((link) => (
+          <a
+            key={link.href}
+            href={link.href}
+            className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 hover:border-white/20 transition"
+          >
+            <p className="text-sm font-semibold text-white">{link.label}</p>
+            <p className="mt-0.5 text-xs text-white/50">{link.desc}</p>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }
