@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type FanRow = {
@@ -28,14 +29,22 @@ export default async function AdminFansPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-          Fans
-        </h1>
-        <p className="mt-2 text-sm text-white/60">
-          Top {fans.length} fans by total points. Read-only for now — edits happen via Supabase
-          directly.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+            Fans
+          </h1>
+          <p className="mt-2 text-sm text-white/60">
+            Top {fans.length} fans by total points. Read-only for now — edits happen via Supabase
+            directly.
+          </p>
+        </div>
+        <Link
+          href="/admin/fans/import"
+          className="rounded-full bg-gradient-to-r from-aurora to-ember px-4 py-2 text-xs font-semibold text-white hover:brightness-110"
+        >
+          Import fans CSV →
+        </Link>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-white/10">

@@ -62,6 +62,9 @@ export default function FanHomeDashboard({ data, streak, recap }: { data: FanHom
       {/* Upcoming events — top 3 from any followed artist */}
       <UpcomingEventsList events={upcomingEvents} hasFollows={followedArtists.length > 0} />
 
+      {/* Daily quest — first incomplete CTA surfaced as a highlighted action */}
+      <DailyQuestCard ctas={ctas} primaryCommunity={primaryCommunity} />
+
       {/* Active CTAs */}
       <ActiveCtasBlock ctas={ctas} />
 
@@ -314,7 +317,7 @@ function RecentActivityFeed({
     <div className="glass-card rounded-2xl p-5">
       <p className="text-xs uppercase tracking-wide text-white/60">Recent activity</p>
       <ul className="mt-4 space-y-3">
-        {posts.slice(0, 3).map((post) => {
+        {posts.slice(0, 5).map((post) => {
           const badge = postKindBadge(post.kind);
           // Gate body for premium / founder-only posts unless the viewer has
           // the right membership. Title + kind chip still surface either way.
@@ -364,6 +367,12 @@ function RecentActivityFeed({
           );
         })}
       </ul>
+      <Link
+        href="/activity"
+        className="mt-4 flex items-center justify-center gap-1 text-xs text-white/50 hover:text-white/80 transition"
+      >
+        View all activity →
+      </Link>
     </div>
   );
 }
@@ -465,6 +474,66 @@ function BadgesInProgressPanel({ items }: { items: FanHomeData["badgesInProgress
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * Surfaces the fan's next incomplete CTA as a "Today's Quest" card.
+ * Hidden entirely when all CTAs are completed or none exist.
+ */
+function DailyQuestCard({
+  ctas,
+  primaryCommunity,
+}: {
+  ctas: FanHomeData["ctas"];
+  primaryCommunity: string;
+}) {
+  const quest = ctas.find((c) => !c.completed);
+  if (!quest) return null;
+
+  const kindIcon: Record<string, string> = {
+    poll: "📊",
+    challenge: "🏆",
+    rsvp: "🎟️",
+    community_post: "💬",
+    referral: "🔗",
+    merch: "🛍️",
+    stream: "🎵",
+  };
+  const icon = kindIcon[quest.kind] ?? "⚡";
+  const href = quest.url ?? `/artists/${quest.artist_slug}`;
+
+  return (
+    <Link
+      href={href}
+      className="group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-aurora/30 bg-gradient-to-r from-aurora/10 via-fuchsia-500/10 to-ember/10 p-5 transition hover:border-aurora/60 hover:brightness-110"
+    >
+      {/* glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-aurora/20 blur-3xl"
+      />
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/30 text-2xl ring-1 ring-white/10">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-aurora">
+          Today&apos;s quest
+        </p>
+        <p className="mt-0.5 truncate text-sm font-semibold text-white">
+          {quest.title}
+        </p>
+        {quest.description && (
+          <p className="mt-0.5 line-clamp-1 text-xs text-white/60">
+            {quest.description}
+          </p>
+        )}
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-sm font-bold text-aurora">+{quest.point_value}</p>
+        <p className="text-[10px] uppercase tracking-wide text-white/50">pts</p>
+      </div>
+    </Link>
   );
 }
 
