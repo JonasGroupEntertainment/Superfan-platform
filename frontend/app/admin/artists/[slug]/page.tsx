@@ -10,6 +10,7 @@ import {
   deleteEventAction,
   sendReminderNowAction,
 } from "../actions";
+import ModerationButton from "@/app/admin/community/moderation-button";
 
 type ReminderRow = {
   event_id: string;
@@ -170,20 +171,19 @@ export default async function AdminArtistEditPage({
                     {e.url && <p className="mt-1 text-xs text-white/50 truncate">{e.url}</p>}
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <form action={sendReminderNowAction}>
-                      <input type="hidden" name="event_id" value={e.id} />
-                      <input type="hidden" name="artist_slug" value={slug} />
-                      <button className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/80 hover:bg-white/20">
-                        📣 Send reminder now
-                      </button>
-                    </form>
-                    <form action={deleteEventAction}>
-                      <input type="hidden" name="event_id" value={e.id} />
-                      <input type="hidden" name="artist_slug" value={slug} />
-                      <button className="text-xs text-rose-300/80 hover:text-rose-300">
-                        Delete
-                      </button>
-                    </form>
+                    <ModerationButton
+                      action={sendReminderNowAction}
+                      fields={{ event_id: e.id, artist_slug: slug }}
+                      label="📣 Send reminder now"
+                      variant="default"
+                    />
+                    <ModerationButton
+                      action={deleteEventAction}
+                      fields={{ event_id: e.id, artist_slug: slug }}
+                      label="Delete"
+                      variant="delete"
+                      confirmMessage="Delete this event? This cannot be undone."
+                    />
                   </div>
                 </div>
                 {rsvps.length > 0 && (
