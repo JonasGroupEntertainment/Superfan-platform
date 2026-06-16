@@ -9,27 +9,36 @@ import Stripe from "stripe";
  * throw if the key is missing rather than erroring at import time, so
  * the admin page can render a "key not set" message instead of crashing
  * the whole build.
+ *
+ * Singleton is cached on globalThis in development so Next.js hot-module
+ * replacement doesn't create a new client on every file change.
  */
-let _client: Stripe | null = null;
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __stripeClient: Stripe | undefined;
+}
 
 export function getStripe(): Stripe {
-  if (_client) return _client;
+  if (globalThis.__stripeClient) return globalThis.__stripeClient;
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
     throw new Error(
       "STRIPE_SECRET_KEY is not set — configure it in Vercel env vars (Production + Preview).",
     );
   }
-  _client = new Stripe(key, {
-    // Omit apiVersion — SDK uses its compiled default, which is what our
-    // type definitions expect. When we bump the SDK we'll re-pin here.
+  const client = new Stripe(key, {
+    // Pinned to the API version shipped with stripe@22. Update this pin
+    // whenever the SDK is upgraded and the API version changes.
+    apiVersion: "2025-03-31.basil",
     typescript: true,
     appInfo: {
       name: "Fan Engage",
       url: "https://fan-engage-pearl.vercel.app",
     },
   });
-  return _client;
+  globalThis.__stripeClient = client;
+  return client;
 }
 
 /** Convenience — return null if the key isn't set, rather than throwing.

@@ -79,7 +79,7 @@ export async function GET(request: Request) {
   const { data: communities, error: commErr } = await admin
     .from("communities")
     .select(
-      "slug, stripe_connect_account_id, payout_split_pct",
+      "slug, stripe_connect_account_id, payout_split_pct, monthly_price_cents, annual_price_cents",
     )
     .eq("stripe_connect_onboarding_complete", true);
 
@@ -96,6 +96,8 @@ export async function GET(request: Request) {
     const accountId = community.stripe_connect_account_id as string;
     const splitPct = (community.payout_split_pct as number) ?? 20;
     const artistPct = 100 - splitPct;
+    const monthlyPrice = (community.monthly_price_cents as number) ?? 0;
+    const annualPrice = (community.annual_price_cents as number) ?? 0;
 
     try {
       // --- Check for existing payout this month (idempotency guard) ---
@@ -112,19 +114,28 @@ export async function GET(request: Request) {
       }
 
       // --- Sum subscription revenue for the prior month ---
+      // Revenue is derived from fan_community_memberships: count active
+      // premium fans whose subscription was live during the period, then
+      // multiply by the community's price for their billing period.
+      // Monthly subscribers contribute monthly_price_cents; annual
+      // subscribers contribute annual_price_cents / 12 (their per-month share).
       const { data: subRows, error: subErr } = await admin
-        .from("fan_subscriptions")
-        .select("price_cents")
-        .eq("community_slug", slug)
-        .eq("status", "active")
-        .gte("created_at", periodStart)
-        .lt("created_at", periodEnd);
+        .from("fan_community_memberships")
+        .select("billing_period")
+        .eq("community_id", slug)
+        .in("subscription_tier", ["premium", "past_due"])
+        .lte("created_at", periodEnd)   // joined before the period ended
+        .or(`current_period_end.is.null,current_period_end.gt.${periodStart}`); // still active during period
 
       if (subErr) throw new Error(`subscriptions query: ${subErr.message}`);
 
       const subRevenue = (subRows ?? []).reduce(
-        (acc: number, row: { price_cents: number }) =>
-          acc + (row.price_cents ?? 0),
+        (acc: number, row: { billing_period: string | null }) => {
+          if (row.billing_period === "annual") {
+            return acc + Math.round(annualPrice / 12);
+          }
+          return acc + monthlyPrice;
+        },
         0,
       );
 

@@ -220,8 +220,7 @@ async function handleSubscriptionUpdated(
 ) {
   const { fanId, communityId } = parseSubMetadata(sub);
   if (!fanId || !communityId) {
-    // Fall back to locating the membership by stripe_subscription_id —
-    // handles the edge case where metadata was stripped somehow.
+    // Metadata stripped somehow — fall back to lookup by subscription id.
     const { data: row } = await admin
       .from("fan_community_memberships")
       .select("fan_id, community_id")
@@ -231,6 +230,7 @@ async function handleSubscriptionUpdated(
       console.warn("subscription.updated: no matching membership", sub.id);
       return;
     }
+    // Found via sub id — fall through to the UPDATE below.
   }
 
   const tier = mapStripeStatus(sub.status);
