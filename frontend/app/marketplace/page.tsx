@@ -1,21 +1,32 @@
 import Link from "next/link";
 import { getActiveOffers } from "@/lib/data/offers";
 import { getCurrentFan } from "@/lib/data/fan";
-import type { Offer } from "@/lib/data/types";
+import type { Offer, OfferCategory } from "@/lib/data/types";
 import { MarketplaceEmptyState, MIN_INVENTORY } from "@/components/marketplace-empty-state";
 import PreviewSignupBanner from "@/components/preview-signup-banner";
 
+export const dynamic = "force-dynamic";
 
-const tabs = ["Featured", "Merch", "Experiences", "Collectibles", "Fan-Exclusive"];
+const TABS = ["Featured", "Merch", "Experiences", "Collectibles", "Fan-Exclusive"] as const;
+type Tab = (typeof TABS)[number];
+
+/** Map each tab to the OfferCategory values it should show. */
+const TAB_CATEGORIES: Record<Tab, OfferCategory[] | null> = {
+  Featured: null, // null = show all
+  Merch: ["merch"],
+  Experiences: ["experience"],
+  Collectibles: ["collectible"],
+  "Fan-Exclusive": ["digital", "ticket"],
+};
 
 // Static preview content used when Supabase has no offers yet, OR for
 // anonymous visitors so the marketplace marketing page has visual weight.
 const fallbackProducts = [
-  { title: "Signed World Tour Hoodie", tier: "Silver", pts: "3,400 pts", category: "Merch", badge: "Limited" },
-  { title: "Backstage Polaroid Pack", tier: "Gold", pts: "5,200 pts", category: "Featured", badge: "Drop" },
-  { title: "VIP Soundcheck + Meet", tier: "Platinum", pts: "9,800 pts", category: "Experiences", badge: "New" },
-  { title: "Handwritten Lyric Sheet", tier: "Gold", pts: "4,750 pts", category: "Collectibles", badge: "1/50" },
-  { title: "Fan-Exclusive Vinyl Variant", tier: "All tiers", pts: "$45", category: "Fan-Exclusive", badge: "Preorder" },
+  { title: "Signed World Tour Hoodie", tier: "Silver", pts: "3,400 pts", category: "Merch" as Tab, badge: "Limited" },
+  { title: "Backstage Polaroid Pack", tier: "Gold", pts: "5,200 pts", category: "Featured" as Tab, badge: "Drop" },
+  { title: "VIP Soundcheck + Meet", tier: "Platinum", pts: "9,800 pts", category: "Experiences" as Tab, badge: "New" },
+  { title: "Handwritten Lyric Sheet", tier: "Gold", pts: "4,750 pts", category: "Collectibles" as Tab, badge: "1/50" },
+  { title: "Fan-Exclusive Vinyl Variant", tier: "All tiers", pts: "$45", category: "Fan-Exclusive" as Tab, badge: "Preorder" },
 ];
 
 function formatPrice(o: Offer): string {
@@ -28,26 +39,34 @@ function formatTier(slug: Offer["min_tier"]): string {
   return slug.charAt(0).toUpperCase() + slug.slice(1);
 }
 
-function formatCategory(cat: Offer["category"]): string {
-  return {
-    merch: "Merch",
-    experience: "Experience",
-    collectible: "Collectible",
-    digital: "Digital",
-    ticket: "Ticket",
-  }[cat];
+/** Map an OfferCategory to the matching Tab name for display purposes. */
+function offerCategoryToTab(cat: OfferCategory): Tab {
+  switch (cat) {
+    case "merch": return "Merch";
+    case "experience": return "Experiences";
+    case "collectible": return "Collectibles";
+    case "digital":
+    case "ticket": return "Fan-Exclusive";
+  }
 }
 
 export const metadata = { title: "Marketplace" };
 
-export default async function MarketplacePage() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function MarketplacePage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const rawTab = Array.isArray(params.tab) ? params.tab[0] : (params.tab ?? "");
+  const activeTab: Tab = (TABS as readonly string[]).includes(rawTab)
+    ? (rawTab as Tab)
+    : "Featured";
+
   const [dbOffers, fan] = await Promise.all([getActiveOffers(), getCurrentFan()]);
   const isSignedIn = fan !== null;
   const usingDb = dbOffers.length >= MIN_INVENTORY;
 
-  // Signed-in users with a sparse DB get the empty-state component as before.
-  // Anonymous visitors and signed-in users with a populated DB fall through
-  // to the rendered marketplace (with fallback products if DB is sparse).
   if (isSignedIn && !usingDb) {
     return (
       <div className="min-h-screen bg-midnight">
@@ -58,16 +77,21 @@ export default async function MarketplacePage() {
     );
   }
 
-  const products = usingDb
+  const allProducts = usingDb
     ? dbOffers.map((o) => ({
         title: o.title,
         tier: formatTier(o.min_tier),
         pts: formatPrice(o),
-        category: formatCategory(o.category),
+        category: offerCategoryToTab(o.category),
         badge: o.inventory != null && o.inventory > 0 ? `${o.inventory} left` : "New",
         slug: o.slug,
       }))
     : fallbackProducts.map((p) => ({ ...p, slug: p.title.toLowerCase().replace(/\s+/g, "-") }));
+
+  const products =
+    activeTab === "Featured"
+      ? allProducts
+      : allProducts.filter((p) => p.category === activeTab);
 
   return (
     <div className="min-h-screen bg-midnight">
@@ -97,53 +121,64 @@ export default async function MarketplacePage() {
             <p className="mt-4 text-sm text-white/70">
               Redeem points or purchase exclusive merch, experiences, and collectibles before they hit the public store.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {tabs.map((tab, index) => (
-                <button
-                  key={tab}
-                  className={`rounded-full px-4 py-2 text-sm ${
-                    index === 0
-                      ? "bg-white text-midnight"
-                      : "border border-white/20 text-white/70"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            <nav className="mt-6 flex flex-wrap gap-3" aria-label="Filter by category">
+              {TABS.map((tab) => {
+                const isActive = tab === activeTab;
+                const href = tab === "Featured" ? "/marketplace" : `/marketplace?tab=${encodeURIComponent(tab)}`;
+                return (
+                  <Link
+                    key={tab}
+                    href={href}
+                    className={`rounded-full px-4 py-2 text-sm transition-colors ${
+                      isActive
+                        ? "bg-white text-midnight font-medium"
+                        : "border border-white/20 text-white/70 hover:border-white/40 hover:text-white"
+                    }`}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {tab}
+                  </Link>
+                );
+              })}
+            </nav>
+          </section>
+
+          {products.length === 0 ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-sm text-white/60">
+              No {activeTab.toLowerCase()} drops available right now. Check back soon.
             </div>
-          </section>
-
-          <section className="grid gap-4 md:grid-cols-2">
-            {products.map((item) => (
-              <div key={item.slug} className="glass-card p-5">
-                <div className="flex items-center justify-between text-xs uppercase tracking-wide text-white/50">
-                  <span>{item.tier !== "Bronze" && item.tier !== "All tiers" && "🔒 "}{item.tier}</span>
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-white/70">{item.badge}</span>
+          ) : (
+            <section className="grid gap-4 md:grid-cols-2">
+              {products.map((item) => (
+                <div key={item.slug} className="glass-card p-5">
+                  <div className="flex items-center justify-between text-xs uppercase tracking-wide text-white/50">
+                    <span>{item.tier !== "Bronze" && item.tier !== "All tiers" && "🔒 "}{item.tier}</span>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-white/70">{item.badge}</span>
+                  </div>
+                  <h3 className="mt-4 text-xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-white/70">Category · {item.category}</p>
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-lg font-semibold text-emerald-300">{item.pts}</span>
+                    {isSignedIn ? (
+                      <button className="rounded-full border border-white/30 px-4 py-2 text-sm text-white/80">
+                        Redeem
+                      </button>
+                    ) : (
+                      <Link
+                        href="/signup?next=/marketplace"
+                        className="rounded-full bg-gradient-to-r from-aurora to-ember px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+                      >
+                        Sign up to redeem
+                      </Link>
+                    )}
+                  </div>
                 </div>
-                <h3 className="mt-4 text-xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm text-white/70">Category · {item.category}</p>
-                <div className="mt-6 flex items-center justify-between">
-                  <span className="text-lg font-semibold text-emerald-300">{item.pts}</span>
-                  {isSignedIn ? (
-                    <button className="rounded-full border border-white/30 px-4 py-2 text-sm text-white/80">
-                      Redeem
-                    </button>
-                  ) : (
-                    <Link
-                      href="/signup?next=/marketplace"
-                      className="rounded-full bg-gradient-to-r from-aurora to-ember px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110"
-                    >
-                      Sign up to redeem
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
-          </section>
+              ))}
+            </section>
+          )}
         </div>
-
       </main>
     </div>
   );
