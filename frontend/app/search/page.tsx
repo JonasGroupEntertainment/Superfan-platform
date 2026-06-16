@@ -112,6 +112,8 @@ function ResultsGrouped({ results }: { results: SearchResults }) {
     hits: SearchHit[];
     render: (h: SearchHit) => React.ReactNode;
   }> = [
+    { title: "Artists", hits: results.groups.artists, render: renderArtist },
+    { title: "Fans", hits: results.groups.fans, render: renderFan },
     {
       title: "Communities",
       hits: results.groups.communities,
@@ -152,6 +154,29 @@ function ResultsGrouped({ results }: { results: SearchResults }) {
         )}
       </div>
     </>
+  );
+}
+
+function renderArtist(h: SearchHit) {
+  if (h.data.kind !== "artist") return null;
+  return (
+    <Link href={`/artists/${h.data.slug}`} className="block">
+      <p className="text-sm font-semibold text-white">{h.data.name}</p>
+      {h.data.tagline && (
+        <p className="mt-1 line-clamp-2 text-xs text-white/70">{h.data.tagline}</p>
+      )}
+    </Link>
+  );
+}
+
+function renderFan(h: SearchHit) {
+  if (h.data.kind !== "fan") return null;
+  const display = h.data.first_name ?? h.data.profile_slug;
+  return (
+    <Link href={`/fans/${h.data.profile_slug}`} className="block">
+      <p className="text-sm font-semibold text-white">{display}</p>
+      <p className="mt-1 text-xs text-white/50">@{h.data.profile_slug}</p>
+    </Link>
   );
 }
 

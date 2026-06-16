@@ -127,6 +127,8 @@ export async function search(query: string): Promise<SearchResults> {
   // 5. Group + cap per group. Hits are already ordered by distance asc
   //    from the RPC, so per-group ordering is preserved.
   const groups: SearchResults["groups"] = {
+    artists: [],
+    fans: [],
     communities: [],
     posts: [],
     events: [],
@@ -153,10 +155,49 @@ export async function search(query: string): Promise<SearchResults> {
     }
   }
 
+  // 6. Name-match artists and fans in parallel — no embeddings needed.
+  const pattern = `%${trimmed}%`;
+  const [artistRows, fanRows] = await Promise.all([
+    admin
+      .from("artists")
+      .select("slug, name, tagline")
+      .ilike("name", pattern)
+      .eq("active", true)
+      .limit(PER_GROUP_LIMIT),
+    admin
+      .from("fans")
+      .select("profile_slug, first_name")
+      .or(`first_name.ilike.${pattern},profile_slug.ilike.${pattern}`)
+      .eq("public_profile_enabled", true)
+      .limit(PER_GROUP_LIMIT),
+  ]);
+
+  for (const row of (artistRows.data ?? []) as Array<{ slug: string; name: string; tagline: string | null }>) {
+    groups.artists.push({
+      source_table: "communities",
+      source_id: row.slug,
+      community_id: row.slug,
+      distance: 0,
+      data: { kind: "artist", slug: row.slug, name: row.name, tagline: row.tagline },
+    });
+  }
+
+  for (const row of (fanRows.data ?? []) as Array<{ profile_slug: string; first_name: string | null }>) {
+    groups.fans.push({
+      source_table: "communities",
+      source_id: row.profile_slug,
+      community_id: "",
+      distance: 0,
+      data: { kind: "fan", profile_slug: row.profile_slug, first_name: row.first_name },
+    });
+  }
+
+  const totalHits = enriched.length + groups.artists.length + groups.fans.length;
+
   return {
     query: trimmed,
     durationMs: Date.now() - started,
-    totalHits: enriched.length,
+    totalHits,
     missingSourceRows,
     groups,
   };
@@ -376,6 +417,8 @@ function emptyResults(query: string, started: number): SearchResults {
     totalHits: 0,
     missingSourceRows: 0,
     groups: {
+      artists: [],
+      fans: [],
       communities: [],
       posts: [],
       events: [],

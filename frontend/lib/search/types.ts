@@ -28,7 +28,9 @@ export type SearchHitData =
   | { kind: "post"; id: string; artist_slug: string; title: string | null; body: string; created_at: string }
   | { kind: "comment"; id: string; post_id: string; body: string; created_at: string; artist_slug: string }
   | { kind: "event"; id: string; artist_slug: string; title: string; detail: string | null; event_date: string | null; url: string | null }
-  | { kind: "reward"; id: string; community_id: string; title: string; description: string | null; point_cost: number };
+  | { kind: "reward"; id: string; community_id: string; title: string; description: string | null; point_cost: number }
+  | { kind: "artist"; slug: string; name: string; tagline: string | null }
+  | { kind: "fan"; profile_slug: string; first_name: string | null };
 
 /** Final response shape — grouped + ordered for the results page. */
 export interface SearchResults {
@@ -38,6 +40,8 @@ export interface SearchResults {
   /** Source rows that didn't load (deleted between embedding + query). */
   missingSourceRows: number;
   groups: {
+    artists: SearchHit[];
+    fans: SearchHit[];
     communities: SearchHit[];
     posts: SearchHit[];
     events: SearchHit[];
