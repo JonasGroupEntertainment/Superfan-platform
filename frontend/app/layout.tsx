@@ -10,6 +10,7 @@ import AdminPill from "@/components/admin-pill";
 import SearchInput from "@/components/search-input";
 import UserMenu from "@/components/user-menu";
 import { MobileNav } from "@/components/mobile-nav";
+import { DesktopNav } from "@/components/desktop-nav";
 import { createClient } from "@/lib/supabase/server";
 import { getUnreadCount } from "@/lib/data/notifications";
 import { getCurrentCommunityId } from "@/lib/community";
@@ -167,17 +168,7 @@ export default async function RootLayout({
               </Link>
               <MobileNav navItems={navItems} />
             </div>
-            <nav className="hidden items-center gap-1 text-sm text-white/70 md:flex">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <DesktopNav navItems={navItems} />
             <div className="hidden flex-1 max-w-xs lg:block">
               <SearchInput compact placeholder="Search Fan Engage…" />
             </div>
