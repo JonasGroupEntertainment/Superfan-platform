@@ -62,8 +62,17 @@ export default function FanHomeDashboard({ data, streak, recap }: { data: FanHom
       {/* Upcoming events — top 3 from any followed artist */}
       <UpcomingEventsList events={upcomingEvents} hasFollows={followedArtists.length > 0} />
 
+      {/* Streak card — amber fire card, only when streak >= 1 */}
+      <StreakCard streak={streak} />
+
       {/* Daily quest — first incomplete CTA surfaced as a highlighted action */}
       <DailyQuestCard ctas={ctas} primaryCommunity={primaryCommunity} />
+
+      {/* Monthly credit — teal card, only for premium fans with a balance */}
+      <CreditBalanceCard
+        creditCents={fan.monthly_credit_cents ?? 0}
+        isPremium={premiumCommunities.length > 0}
+      />
 
       {/* Active CTAs */}
       <ActiveCtasBlock ctas={ctas} />
@@ -534,6 +543,99 @@ function DailyQuestCard({
         <p className="text-[10px] uppercase tracking-wide text-white/50">pts</p>
       </div>
     </Link>
+  );
+}
+
+/** Next milestone above `days` in the canonical streak ladder. */
+function nextStreakMilestone(days: number): number {
+  for (const m of [7, 30, 100, 365]) {
+    if (days < m) return m;
+  }
+  return 365;
+}
+
+/**
+ * Amber fire card showing the fan's current login/engagement streak.
+ * Hidden when streak is 0 or when no streak data is available.
+ */
+function StreakCard({
+  streak,
+}: {
+  streak?: { currentStreakDays: number; longestStreakDays: number; pointsAwardedThisVisit: number; newMilestone: number | null; isNewToday: boolean; lastActiveDate: string | null } | null;
+}) {
+  if (!streak || streak.currentStreakDays < 1) return null;
+  const days = streak.currentStreakDays;
+  const milestone = nextStreakMilestone(days);
+  const pct = Math.min(100, Math.round((days / milestone) * 100));
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-amber-400/40 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-400/10 p-5">
+      {/* ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-amber-400/20 blur-3xl"
+      />
+      <div className="flex items-center gap-3">
+        <span className="text-3xl" aria-hidden>🔥</span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-300">
+            Streak
+          </p>
+          <p className="mt-0.5 text-xl font-bold text-white">
+            {days.toLocaleString()}-day streak
+          </p>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className="text-xs text-amber-300/80">next</p>
+          <p className="text-sm font-bold text-amber-200">{milestone}d</p>
+        </div>
+      </div>
+      {/* progress to next milestone */}
+      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-1.5 text-right text-[10px] text-amber-300/70">
+        {days}/{milestone} days
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Teal credit card — only visible to premium fans with a non-zero balance.
+ */
+function CreditBalanceCard({
+  creditCents,
+  isPremium,
+}: {
+  creditCents: number;
+  isPremium: boolean;
+}) {
+  if (!isPremium || creditCents <= 0) return null;
+  const dollars = (creditCents / 100).toFixed(2);
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-teal-400/40 bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-400/10 p-5">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-teal-400/20 blur-3xl"
+      />
+      <div className="flex items-center gap-3">
+        <span className="text-3xl" aria-hidden>💳</span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-teal-300">
+            Monthly credit
+          </p>
+          <p className="mt-0.5 text-xl font-bold text-white">${dollars}</p>
+          <p className="mt-0.5 text-xs text-teal-300/70">
+            Used automatically at checkout
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

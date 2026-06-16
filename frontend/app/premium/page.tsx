@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentCommunityId } from "@/lib/community";
 import { getFounderState, fmtPrice } from "@/lib/stripe-helpers";
 import { createCheckoutSessionAction } from "./actions";
+import { FounderSlotsCounter } from "./founder-slots-counter";
 
 export const dynamic = "force-dynamic";
 
@@ -169,6 +170,14 @@ export default async function PremiumPage({
               See who&apos;s already a Founding Fan →
             </Link>
           </div>
+        )}
+
+        {/* Real-time slot counter */}
+        {!founder.isFull && founder.founderCap > 0 && (
+          <FounderSlotsCounter
+            initialFilled={founder.founderCount}
+            total={founder.founderCap}
+          />
         )}
 
         {/* Already-Premium state */}

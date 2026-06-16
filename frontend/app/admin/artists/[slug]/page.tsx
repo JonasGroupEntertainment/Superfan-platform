@@ -76,14 +76,22 @@ export default async function AdminArtistEditPage({
           </h1>
           <p className="mt-1 text-xs text-white/60">/{artist.slug as string}</p>
         </div>
-        <Link
-          href={`/artists/${artist.slug as string}`}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-full border border-white/20 px-4 py-2 text-xs text-white/80 hover:bg-white/10"
-        >
-          View public page ↗
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/admin/artists/${artist.slug as string}/predictions`}
+            className="rounded-full border border-white/20 px-4 py-2 text-xs text-white/80 hover:bg-white/10"
+          >
+            Predictions
+          </Link>
+          <Link
+            href={`/artists/${artist.slug as string}`}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full border border-white/20 px-4 py-2 text-xs text-white/80 hover:bg-white/10"
+          >
+            View public page ↗
+          </Link>
+        </div>
       </div>
 
       <ArtistEditForm

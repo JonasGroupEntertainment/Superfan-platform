@@ -184,6 +184,10 @@ async function handleSubscriptionCreated(
     .eq("community_id", communityId);
   if (updErr) throw new Error(`membership update failed: ${updErr.message}`);
 
+  // Referral conversion — award 500 points to the referrer if this fan
+  // was referred and their referral is still pending.
+  await awardReferralPoints(fanId, admin);
+
   // Founder slot — only if subscription metadata marks them as a
   // potential founder. The Postgres function serializes concurrent
   // claims per community via advisory lock and returns null if the cap
@@ -344,6 +348,74 @@ function parseSubMetadata(sub: Stripe.Subscription) {
 function subPeriodEnd(sub: Stripe.Subscription): string | null {
   const end = (sub as unknown as { current_period_end?: number }).current_period_end;
   return end ? new Date(end * 1000).toISOString() : null;
+}
+
+/**
+ * When a referred fan goes Premium, credit 500 points to the referrer and
+ * mark the referral as verified. Idempotent — a points_ledger row keyed on
+ * source_ref guards against double-award on Stripe webhook replays.
+ */
+async function awardReferralPoints(
+  fanId: string,
+  admin: SupabaseClient,
+): Promise<void> {
+  const { data: referral } = await admin
+    .from("referrals")
+    .select("id, referrer_id")
+    .eq("referred_id", fanId)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (!referral) return;
+
+  const REFERRAL_POINTS = 500;
+  const sourceRef = `referral_conversion:${referral.id}`;
+
+  // Guard: skip if we already awarded points for this referral.
+  const { data: existing } = await admin
+    .from("points_ledger")
+    .select("id")
+    .eq("source_ref", sourceRef)
+    .maybeSingle();
+
+  if (!existing) {
+    const { error: ledgerErr } = await admin.from("points_ledger").insert({
+      fan_id: referral.referrer_id,
+      delta: REFERRAL_POINTS,
+      source: "referral",
+      source_ref: sourceRef,
+      note: "Referred fan went Premium",
+    });
+
+    if (ledgerErr) {
+      console.warn("referral points_ledger insert failed", ledgerErr.message);
+    } else {
+      // Mirror the pattern used in award_community_badge: fetch then update.
+      const { data: fanRow } = await admin
+        .from("fans")
+        .select("total_points")
+        .eq("id", referral.referrer_id)
+        .maybeSingle();
+
+      if (fanRow !== null) {
+        await admin
+          .from("fans")
+          .update({ total_points: (fanRow.total_points ?? 0) + REFERRAL_POINTS })
+          .eq("id", referral.referrer_id);
+      }
+    }
+  }
+
+  // Mark converted. Use verified_at (existing schema column) — the status
+  // moves to 'verified' which also triggers the award_referral_badges trigger.
+  await admin
+    .from("referrals")
+    .update({
+      status: "verified",
+      points_awarded: REFERRAL_POINTS,
+      verified_at: new Date().toISOString(),
+    })
+    .eq("id", referral.id);
 }
 
 /**

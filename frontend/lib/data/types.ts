@@ -41,6 +41,7 @@ export interface FanProfile {
   sms_opted_in: boolean;
   email_opted_in: boolean;
   avatar_url: string | null;
+  monthly_credit_cents?: number | null;
 }
 
 export type BadgeCategory = "welcome" | "referral" | "community" | "tier";

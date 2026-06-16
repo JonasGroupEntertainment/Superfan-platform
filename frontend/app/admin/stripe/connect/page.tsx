@@ -38,6 +38,96 @@ function StatusBadge({ complete, accountId }: { complete: boolean; accountId: st
   );
 }
 
+/** Tiny inline sparkline — 7 bars of varying heights */
+function Sparkline({ mrrCents }: { mrrCents: number }) {
+  // Deterministic pseudo-random bars seeded from mrrCents so they look
+  // plausible without needing historical data.
+  const seed = mrrCents || 1;
+  const heights = Array.from({ length: 7 }, (_, i) => {
+    const v = Math.abs(Math.sin(seed * (i + 1) * 0.37)) * 0.7 + 0.3;
+    return Math.round(v * 24);
+  });
+  const max = Math.max(...heights);
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-end",
+        gap: "2px",
+        height: "28px",
+      }}
+      title="MRR trend (illustrative)"
+    >
+      {heights.map((h, i) => (
+        <div
+          key={i}
+          style={{
+            width: "6px",
+            height: `${Math.round((h / max) * 24)}px`,
+            borderRadius: "2px",
+            background:
+              i === heights.length - 1
+                ? "rgba(52,211,153,0.9)"
+                : "rgba(255,255,255,0.2)",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+interface StripeRevData {
+  activeCount: number;
+  pastDueCount: number;
+  realMrrCents: number;
+}
+
+async function fetchStripeRevenue(
+  slugs: string[],
+): Promise<Record<string, StripeRevData>> {
+  const stripe = getStripeOrNull();
+  if (!stripe) return {};
+
+  const result: Record<string, StripeRevData> = {};
+
+  // Fetch up to 100 active subscriptions — filter by metadata if available
+  const [activeResp, pastDueResp] = await Promise.all([
+    stripe.subscriptions.list({ limit: 100, status: "active", expand: [] }),
+    stripe.subscriptions.list({ limit: 100, status: "past_due", expand: [] }),
+  ]);
+
+  const allSubs = [
+    ...activeResp.data.map((s) => ({ ...s, _status: "active" as const })),
+    ...pastDueResp.data.map((s) => ({ ...s, _status: "past_due" as const })),
+  ];
+
+  // Initialise buckets for every known slug
+  for (const slug of slugs) {
+    result[slug] = { activeCount: 0, pastDueCount: 0, realMrrCents: 0 };
+  }
+
+  for (const sub of allSubs) {
+    const metaSlug = (sub.metadata as Record<string, string>)?.community_slug;
+    const matchedSlug = metaSlug && slugs.includes(metaSlug) ? metaSlug : null;
+    if (!matchedSlug) continue;
+
+    const bucket = result[matchedSlug];
+    const amountCents = sub.items.data.reduce(
+      (sum, item) => sum + (item.price?.unit_amount ?? 0) * (item.quantity ?? 1),
+      0,
+    );
+
+    if (sub._status === "active") {
+      bucket.activeCount += 1;
+      bucket.realMrrCents += amountCents;
+    } else {
+      bucket.pastDueCount += 1;
+    }
+  }
+
+  return result;
+}
+
 export default async function StripeConnectPage({
   searchParams,
 }: {
@@ -70,7 +160,9 @@ export default async function StripeConnectPage({
     stripe_product_id: string | null;
   }>;
 
-  // Pull live subscriber counts from Supabase (faster than Stripe API)
+  const slugs = rows.map((r) => r.slug);
+
+  // Pull live subscriber counts from Supabase (for Connect-account display)
   const { data: memberCounts } = await admin
     .from("fan_community_memberships")
     .select("community_id")
@@ -81,7 +173,20 @@ export default async function StripeConnectPage({
     countByCommunity[m.community_id] = (countByCommunity[m.community_id] ?? 0) + 1;
   }
 
+  // Real Stripe revenue — keyed by community slug via subscription metadata
+  const stripeRev = await fetchStripeRevenue(slugs);
+
   const stripeConfigured = Boolean(getStripeOrNull());
+
+  // Totals across all communities
+  const totalRealMrrCents = Object.values(stripeRev).reduce(
+    (sum, d) => sum + d.realMrrCents,
+    0,
+  );
+  const totalPastDue = Object.values(stripeRev).reduce(
+    (sum, d) => sum + d.pastDueCount,
+    0,
+  );
 
   return (
     <div className="space-y-8 px-4 py-10 max-w-5xl mx-auto">
@@ -121,7 +226,7 @@ export default async function StripeConnectPage({
         </div>
       )}
 
-      {/* Summary MRR bar */}
+      {/* Summary stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
           {
@@ -135,25 +240,24 @@ export default async function StripeConnectPage({
             sub: "across all communities",
           },
           {
-            label: "Est. MRR",
-            value: fmtUSD(
-              rows.reduce((sum, r) => {
-                const subs = countByCommunity[r.slug] ?? 0;
-                return sum + subs * r.monthly_price_cents;
-              }, 0),
-            ),
-            sub: "assumes monthly billing",
+            label: "Real MRR",
+            value: totalRealMrrCents > 0 ? fmtUSD(totalRealMrrCents) : "—",
+            sub: totalPastDue > 0
+              ? `⚠ ${totalPastDue} past-due / churn risk`
+              : "from live Stripe subs",
+            warn: totalPastDue > 0,
           },
           {
             label: "Connect accounts",
             value: rows.filter((r) => r.stripe_connect_onboarding_complete).length,
             sub: `of ${rows.length} fully onboarded`,
+            warn: false,
           },
-        ].map(({ label, value, sub }) => (
+        ].map(({ label, value, sub, warn }) => (
           <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-4">
             <p className="text-2xl font-bold text-white">{value}</p>
             <p className="mt-0.5 text-xs uppercase tracking-wide text-white/50">{label}</p>
-            <p className="mt-1 text-xs text-white/40">{sub}</p>
+            <p className={`mt-1 text-xs ${warn ? "text-amber-300" : "text-white/40"}`}>{sub}</p>
           </div>
         ))}
       </div>
@@ -162,8 +266,15 @@ export default async function StripeConnectPage({
       <div className="space-y-6">
         {rows.map((c) => {
           const subs = countByCommunity[c.slug] ?? 0;
-          const mrr = subs * c.monthly_price_cents;
-          const artistShare = Math.round(mrr * (1 - c.payout_split_pct / 100));
+          const rev = stripeRev[c.slug] ?? { activeCount: 0, pastDueCount: 0, realMrrCents: 0 };
+
+          // Prefer real Stripe MRR; fall back to estimated if Stripe returns nothing
+          const displayMrr = rev.realMrrCents > 0
+            ? rev.realMrrCents
+            : subs * c.monthly_price_cents;
+          const mrrLabel = rev.realMrrCents > 0 ? "Real MRR" : "Est. MRR";
+          const artistShare = Math.round(displayMrr * (1 - c.payout_split_pct / 100));
+          const hasPastDue = rev.pastDueCount > 0;
 
           return (
             <div
@@ -180,6 +291,11 @@ export default async function StripeConnectPage({
                   {!c.active && (
                     <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/40">Inactive</span>
                   )}
+                  {hasPastDue && (
+                    <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300">
+                      ⚠ {rev.pastDueCount} past-due
+                    </span>
+                  )}
                   <StatusBadge
                     complete={c.stripe_connect_onboarding_complete}
                     accountId={c.stripe_connect_account_id}
@@ -188,19 +304,33 @@ export default async function StripeConnectPage({
               </div>
 
               {/* Revenue snapshot */}
-              <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="grid grid-cols-4 gap-3 text-center">
                 <div className="rounded-xl bg-white/5 p-3">
-                  <p className="text-lg font-bold text-white">{subs}</p>
-                  <p className="text-xs text-white/50">Subscribers</p>
+                  <p className="text-lg font-bold text-white">{rev.activeCount > 0 ? rev.activeCount : subs}</p>
+                  <p className="text-xs text-white/50">
+                    {rev.activeCount > 0 ? "Active (Stripe)" : "Subscribers"}
+                  </p>
+                </div>
+                <div className={`rounded-xl p-3 ${hasPastDue ? "bg-amber-500/10" : "bg-white/5"}`}>
+                  <p className={`text-lg font-bold ${hasPastDue ? "text-amber-300" : "text-white/40"}`}>
+                    {rev.pastDueCount}
+                  </p>
+                  <p className="text-xs text-white/50">Past-due</p>
                 </div>
                 <div className="rounded-xl bg-white/5 p-3">
-                  <p className="text-lg font-bold text-white">{fmtUSD(mrr)}</p>
-                  <p className="text-xs text-white/50">Est. MRR</p>
+                  <p className="text-lg font-bold text-white">{fmtUSD(displayMrr)}</p>
+                  <p className="text-xs text-white/50">{mrrLabel}</p>
                 </div>
                 <div className="rounded-xl bg-emerald-500/10 p-3">
                   <p className="text-lg font-bold text-emerald-300">{fmtUSD(artistShare)}</p>
                   <p className="text-xs text-white/50">Artist share / mo</p>
                 </div>
+              </div>
+
+              {/* Sparkline */}
+              <div className="flex items-center gap-3">
+                <Sparkline mrrCents={displayMrr} />
+                <p className="text-xs text-white/40">MRR trend (illustrative)</p>
               </div>
 
               {/* Pricing edit */}

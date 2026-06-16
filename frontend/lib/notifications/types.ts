@@ -12,7 +12,8 @@ export type NotificationType =
   | "comment_on_my_post"
   | "redemption"
   | "drops"
-  | "rsvp_confirmation";
+  | "rsvp_confirmation"
+  | "leaderboard";
 
 export type Channel = "push" | "sms" | "email" | "in_app";
 
@@ -41,6 +42,7 @@ export interface NotificationPreferences {
   notify_redemption: boolean;
   notify_drops: boolean;
   notify_rsvp_confirmation: boolean;
+  notify_leaderboard: boolean;
   quiet_start: string | null;     // 'HH:MM' or null
   quiet_end: string | null;
   timezone: string;
@@ -72,5 +74,7 @@ export function preferenceColumnFor(type: NotificationType): keyof NotificationP
       return "notify_drops";
     case "rsvp_confirmation":
       return "notify_rsvp_confirmation";
+    case "leaderboard":
+      return "notify_leaderboard";
   }
 }

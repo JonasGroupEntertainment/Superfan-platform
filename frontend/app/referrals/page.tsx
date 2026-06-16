@@ -45,6 +45,8 @@ export default async function ReferralsPage() {
   const isSignedIn = fan !== null;
   const inviteUrl = await buildInviteUrl(fan?.referral_code);
   const myCount = myReferrals.length;
+  const convertedCount = myReferrals.filter((r) => r.status === "verified").length;
+  const pointsEarned = myReferrals.reduce((sum, r) => sum + (r.points_awarded ?? 0), 0);
 
   const leaderboardRows = isSignedIn
     ? leaderboard.map((row) => ({
@@ -86,11 +88,35 @@ export default async function ReferralsPage() {
                 : "Members get a personal invite link. Share it and earn bonus points, badges, and early access rewards every time a friend joins."}
             </p>
             {isSignedIn && (
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <code className="flex-1 rounded-2xl bg-black/40 px-4 py-3 text-sm">{inviteUrl}</code>
-                <CopyLinkButton url={inviteUrl} />
-                <NativeShareButton url={inviteUrl} />
-              </div>
+              <>
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <code className="flex-1 rounded-2xl bg-black/40 px-4 py-3 text-sm">{inviteUrl}</code>
+                  <CopyLinkButton url={inviteUrl} />
+                  <NativeShareButton url={inviteUrl} />
+                </div>
+
+                {myCount === 0 ? (
+                  <div className="mt-6 rounded-2xl border border-dashed border-purple-500/40 bg-purple-900/20 px-5 py-4 text-sm text-white/80">
+                    <span className="font-semibold text-purple-300">Earn 500 points</span> for every
+                    friend who goes Premium — share your link above to get started.
+                  </div>
+                ) : (
+                  <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+                    <div className="rounded-2xl bg-black/30 px-3 py-4">
+                      <p className="text-2xl font-bold">{myCount}</p>
+                      <p className="mt-1 text-xs text-white/60">Sent</p>
+                    </div>
+                    <div className="rounded-2xl bg-black/30 px-3 py-4">
+                      <p className="text-2xl font-bold">{convertedCount}</p>
+                      <p className="mt-1 text-xs text-white/60">Converted</p>
+                    </div>
+                    <div className="rounded-2xl bg-black/30 px-3 py-4">
+                      <p className="text-2xl font-bold">{pointsEarned.toLocaleString()}</p>
+                      <p className="mt-1 text-xs text-white/60">Pts earned</p>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </section>
 

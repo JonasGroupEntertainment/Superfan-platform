@@ -30,6 +30,7 @@ export async function getPreferences(
     notify_redemption: true,
     notify_drops: true,
     notify_rsvp_confirmation: true,
+    notify_leaderboard: true,
     quiet_start: null,
     quiet_end: null,
     timezone: "America/Chicago",
