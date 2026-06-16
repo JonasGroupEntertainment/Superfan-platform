@@ -30,7 +30,7 @@ export function getStripe(): Stripe {
   const client = new Stripe(key, {
     // Pinned to the API version shipped with stripe@22. Update this pin
     // whenever the SDK is upgraded and the API version changes.
-    apiVersion: "2025-03-31.basil",
+    apiVersion: "2026-03-25.dahlia",
     typescript: true,
     appInfo: {
       name: "Fan Engage",
