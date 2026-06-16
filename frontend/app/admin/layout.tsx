@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAdminContext } from "@/lib/admin";
 import { getCommunity } from "@/lib/community";
@@ -30,18 +29,10 @@ export default async function AdminLayout({
   const ctx = await getAdminContext();
   if (!ctx) redirect("/login?next=/admin");
 
-  // Check which pathname we're on — if the user hasn't picked a community
-  // yet AND they're not already on the switcher page, bounce them there.
-  // x-pathname is stamped by middleware on every request, making it the
-  // only reliable source of the current path inside a layout.
-  const h = await headers();
-  const pathname = h.get("x-pathname") ?? "";
-  const isOnSwitcher = pathname.startsWith("/admin/communities");
-  const needsToPick =
-    (ctx.isSuperAdmin || ctx.communities.length > 1) &&
-    !ctx.currentCommunityId &&
-    !isOnSwitcher;
-  if (needsToPick) redirect("/admin/communities");
+  // If somehow no community resolved (no communities in DB at all),
+  // the admin can still use the switcher to understand the state.
+  // We no longer redirect to /admin/communities on first visit — getAdminContext
+  // now auto-selects the first community so currentCommunityId is always set.
 
   const currentCommunity = ctx.currentCommunityId
     ? await getCommunity(ctx.currentCommunityId)

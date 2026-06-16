@@ -88,13 +88,28 @@ export async function getAdminContext(): Promise<AdminContext | null> {
     .filter((c) => c !== "*");
 
   // Resolve the active community:
-  // - Super-admin → cookie (they can switch); may be null if not set yet
+  // - Super-admin → cookie; fall back to first community in DB so the
+  //   layout never has to redirect to a picker (which can loop).
   // - Single-community admin → that one community
   // - Multi-community (non-super) admin → cookie; default to first grant
   let currentCommunityId: string | null = null;
   if (isSuperAdmin) {
     const jar = await cookies();
-    currentCommunityId = jar.get(ACTIVE_ADMIN_COMMUNITY_COOKIE)?.value ?? null;
+    const fromCookie = jar.get(ACTIVE_ADMIN_COMMUNITY_COOKIE)?.value ?? null;
+    if (fromCookie) {
+      currentCommunityId = fromCookie;
+    } else {
+      // No cookie yet — pick the first active community so the admin
+      // lands directly on the dashboard without a redirect loop.
+      const { data: firstCommunity } = await admin
+        .from("communities")
+        .select("slug")
+        .eq("active", true)
+        .order("sort_order")
+        .limit(1)
+        .maybeSingle();
+      currentCommunityId = (firstCommunity?.slug as string | null) ?? null;
+    }
   } else if (communities.length === 1) {
     currentCommunityId = communities[0];
   } else if (communities.length > 1) {
