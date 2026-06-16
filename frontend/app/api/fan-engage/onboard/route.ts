@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { fanDataRateLimiter, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -24,7 +25,31 @@ type OnboardPayload = {
  * Idempotent: re-submitting updates the fan row and is a no-op for the
  * signup bonus if one has already been awarded.
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const clientIp = getClientIp(request.headers);
+  const rateLimitResult = fanDataRateLimiter.check(clientIp);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      {
+        error: "Too many onboarding requests. Please try again later.",
+        retryAfter: Math.ceil(
+          (rateLimitResult.resetTime.getTime() - Date.now()) / 1000,
+        ),
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.ceil(
+            (rateLimitResult.resetTime.getTime() - Date.now()) / 1000,
+          ).toString(),
+          "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+          "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+          "X-RateLimit-Reset": rateLimitResult.resetTime.toISOString(),
+        },
+      },
+    );
+  }
   try {
     const supabase = await createClient();
     const {

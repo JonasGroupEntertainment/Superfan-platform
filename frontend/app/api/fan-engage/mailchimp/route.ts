@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { fanDataRateLimiter, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -15,7 +16,31 @@ type SubscribePayload = {
  * Uses PUT /lists/{id}/members/{subscriber_hash} which is an upsert —
  * calling it twice with the same email is safe.
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const clientIp = getClientIp(request.headers);
+  const rateLimitResult = fanDataRateLimiter.check(clientIp);
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      {
+        error: "Too many subscription requests. Please try again later.",
+        retryAfter: Math.ceil(
+          (rateLimitResult.resetTime.getTime() - Date.now()) / 1000,
+        ),
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.ceil(
+            (rateLimitResult.resetTime.getTime() - Date.now()) / 1000,
+          ).toString(),
+          "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+          "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+          "X-RateLimit-Reset": rateLimitResult.resetTime.toISOString(),
+        },
+      },
+    );
+  }
   const apiKey = process.env.MAILCHIMP_API_KEY;
   const server = process.env.MAILCHIMP_SERVER_PREFIX;
   const listId = process.env.MAILCHIMP_AUDIENCE_ID;
