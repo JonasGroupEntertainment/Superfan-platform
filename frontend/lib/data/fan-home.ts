@@ -120,6 +120,15 @@ export interface FanHomeData {
  * public views are read-only by design.
  */
 export async function getFanHomeData(): Promise<FanHomeData | null> {
+  try {
+    return await _getFanHomeData();
+  } catch (err) {
+    console.error("[getFanHomeData] failed, returning null:", err);
+    return null;
+  }
+}
+
+async function _getFanHomeData(): Promise<FanHomeData | null> {
   const supabase = await createClient();
   const {
     data: { user },

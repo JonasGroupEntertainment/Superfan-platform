@@ -65,16 +65,16 @@ export default async function Home({
   // Signed-in path — parallel-fetch everything the dashboard needs. Each
   // gracefully returns null / empty on error so the page never breaks.
   const [kpis, featured, tiers, streak, recap, fanHome] = await Promise.all([
-    getCurrentFanKpis(),
-    getFeaturedOffers(3),
-    getTiers(),
+    getCurrentFanKpis().catch((err) => { console.error("[home] getCurrentFanKpis failed:", err); return null; }),
+    getFeaturedOffers(3).catch((err) => { console.error("[home] getFeaturedOffers failed:", err); return []; }),
+    getTiers().catch((err) => { console.error("[home] getTiers failed:", err); return []; }),
     // Touch streak before reading fan-home data so the dashboard
     // sees the freshly-incremented streak counter on the same render.
-    fan?.id ? touchStreak(fan.id) : Promise.resolve(null),
-      // Compute the past-7-day recap for the "Your week" tile. Returns a
+    (fan?.id ? touchStreak(fan.id) : Promise.resolve(null)).catch(() => null),
+    // Compute the past-7-day recap for the "Your week" tile. Returns a
     // benign empty recap on error so Fan Home never blocks.
-    fan?.id ? gatherWeeklyRecap(fan.id) : Promise.resolve(null),
-      getFanHomeData(),
+    (fan?.id ? gatherWeeklyRecap(fan.id) : Promise.resolve(null)).catch(() => null),
+    getFanHomeData().catch((err) => { console.error("[home] getFanHomeData failed:", err); return null; }),
   ]);
 
   // KPI grid — real data from Supabase. If kpis is null (DB hiccup), we
