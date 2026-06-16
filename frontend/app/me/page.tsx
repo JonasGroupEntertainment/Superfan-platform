@@ -28,6 +28,11 @@ export default async function MeIndexPage() {
 
       <ul className="space-y-3">
         <Row
+          href="/me/profile"
+          title="Edit profile"
+          body="Update your display name, city, and avatar."
+        />
+        <Row
           href="/inbox"
           title="Inbox"
           body="Recent notifications, badges, and milestones."
