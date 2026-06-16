@@ -22,11 +22,11 @@ async function requireAdmin() {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await requireAdmin();
-    const influencerId = params.id;
+    const { id: influencerId } = await params;
 
     const db = createAdminClient();
     const { data, error } = await db
@@ -52,11 +52,11 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     await requireAdmin();
-    const influencerId = params.id;
+    const { id: influencerId } = await params;
     const body = await request.json();
     const { code, discount_type, discount_value, max_redemptions } = body;
 
