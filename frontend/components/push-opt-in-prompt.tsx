@@ -55,7 +55,13 @@ export default function PushOptInPrompt({
     if (!("serviceWorker" in navigator)) return;
     if (!("PushManager" in window)) return;
     if (Notification.permission === "denied") return;
-    if (sessionStorage.getItem("fe_push_dismissed") === "1") return;
+    const dismissed = localStorage.getItem("fe_push_dismissed");
+    if (dismissed) {
+      const expiresAt = parseInt(dismissed, 10);
+      if (!isNaN(expiresAt) && Date.now() < expiresAt) return;
+      // Expired — remove stale key so we can show the banner again.
+      localStorage.removeItem("fe_push_dismissed");
+    }
     setShow(true);
   }, [vapidPublicKey, alreadySubscribed]);
 
@@ -112,7 +118,9 @@ export default function PushOptInPrompt({
   }
 
   function dismiss() {
-    sessionStorage.setItem("fe_push_dismissed", "1");
+    // Suppress the banner for 30 days.
+    const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    localStorage.setItem("fe_push_dismissed", String(expiresAt));
     setShow(false);
   }
 
@@ -143,7 +151,8 @@ export default function PushOptInPrompt({
           <button
             type="button"
             onClick={dismiss}
-            className="rounded-lg px-3 py-2 text-xs font-medium text-white/70 hover:text-white"
+            className="rounded-lg border border-white/20 px-3 py-2 text-xs font-medium text-white/80 hover:border-white/40 hover:text-white"
+            aria-label="Dismiss notification prompt for 30 days"
           >
             Not now
           </button>
