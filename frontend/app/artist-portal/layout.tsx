@@ -54,7 +54,10 @@ export default async function ArtistPortalLayout({
 
   const nav = [
     { href: "/artist-portal", label: "Dashboard" },
+    { href: "/artist-portal/events", label: "Events" },
     { href: "/artist-portal/community", label: "Community" },
+    { href: "/artist-portal/redemptions", label: "Redemptions" },
+    { href: "/artist-portal/leaderboard", label: "Leaderboard" },
     { href: "/artist-portal/payouts", label: "Payouts" },
   ];
 

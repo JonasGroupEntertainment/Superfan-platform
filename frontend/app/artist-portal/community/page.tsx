@@ -3,6 +3,32 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+async function deletePost(formData: FormData) {
+  "use server";
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: adminRow } = await supabase
+    .from("admin_users")
+    .select("community_id")
+    .eq("user_id", user.id)
+    .eq("role", "owner")
+    .maybeSingle();
+  if (!adminRow) return;
+
+  const postId = (formData.get("post_id") as string | null)?.trim();
+  if (!postId) return;
+
+  await supabase
+    .from("community_posts")
+    .delete()
+    .eq("id", postId)
+    .eq("artist_slug", adminRow.community_id);
+
+  revalidatePath("/artist-portal/community");
+}
+
 async function createPost(formData: FormData) {
   "use server";
   const supabase = await createClient();
@@ -128,10 +154,24 @@ export default async function ArtistPortalCommunityPage() {
                 <p className="text-sm text-white/80 whitespace-pre-line">
                   {p.body}
                 </p>
-                <p className="mt-3 text-xs text-white/40">
-                  {author?.display_name ?? "Artist"} ·{" "}
-                  {new Date(p.created_at as string).toLocaleString()}
-                </p>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-xs text-white/40">
+                    {author?.display_name ?? "Artist"} ·{" "}
+                    {new Date(p.created_at as string).toLocaleString()}
+                  </p>
+                  <form action={deletePost}>
+                    <input type="hidden" name="post_id" value={p.id as string} />
+                    <button
+                      type="submit"
+                      className="text-xs text-white/30 hover:text-rose-300 transition-colors"
+                      onClick={(e) => {
+                        if (!confirm("Delete this post?")) e.preventDefault();
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
               </div>
             );
           })
