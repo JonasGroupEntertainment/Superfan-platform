@@ -71,7 +71,7 @@ export default async function ArtistPortalRedemptionsPage() {
           {pending.map((r) => (
             <RedemptionRow
               key={r.id as string}
-              redemption={r as Parameters<typeof RedemptionRow>[0]["redemption"]}
+              redemption={r as unknown as Parameters<typeof RedemptionRow>[0]["redemption"]}
               fanName={fanMap[r.fan_id as string]?.first_name ?? "Fan"}
             />
           ))}
@@ -84,7 +84,7 @@ export default async function ArtistPortalRedemptionsPage() {
           {fulfilled.map((r) => (
             <RedemptionRow
               key={r.id as string}
-              redemption={r as Parameters<typeof RedemptionRow>[0]["redemption"]}
+              redemption={r as unknown as Parameters<typeof RedemptionRow>[0]["redemption"]}
               fanName={fanMap[r.fan_id as string]?.first_name ?? "Fan"}
             />
           ))}
