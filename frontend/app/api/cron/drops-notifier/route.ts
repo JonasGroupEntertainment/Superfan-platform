@@ -56,7 +56,7 @@ export async function GET(req: Request) {
     const { data: justLaunched } = await admin
       .from("rewards_catalog")
       .select(
-        "id, title, description, community_id, drops_at, expires_at, active, is_drop",
+        "id, title, description, community_id, drops_at, expires_at, active, is_drop, stock",
       )
       .eq("is_drop", true)
       .eq("active", true)
@@ -66,7 +66,13 @@ export async function GET(req: Request) {
     for (const row of justLaunched ?? []) {
       const rewardId = row.id as string;
       const artistSlug = row.community_id as string | null;
+      const stock = row.stock as number | null;
       if (!artistSlug) {
+        result.launched.skipped += 1;
+        continue;
+      }
+      // Skip if stock is tracked and sold out — no point notifying fans.
+      if (stock !== null && stock <= 0) {
         result.launched.skipped += 1;
         continue;
       }
@@ -99,7 +105,7 @@ export async function GET(req: Request) {
     const { data: expiringSoon } = await admin
       .from("rewards_catalog")
       .select(
-        "id, title, community_id, expires_at, active, is_drop, drops_at",
+        "id, title, community_id, expires_at, active, is_drop, drops_at, stock",
       )
       .eq("is_drop", true)
       .eq("active", true)
@@ -110,7 +116,13 @@ export async function GET(req: Request) {
       const rewardId = row.id as string;
       const artistSlug = row.community_id as string | null;
       const expiresAt = row.expires_at as string | null;
+      const stock = row.stock as number | null;
       if (!artistSlug || !expiresAt) {
+        result.expiring.skipped += 1;
+        continue;
+      }
+      // Skip the 1-hour warning if the drop is already sold out.
+      if (stock !== null && stock <= 0) {
         result.expiring.skipped += 1;
         continue;
       }
