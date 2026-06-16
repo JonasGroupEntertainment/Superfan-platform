@@ -67,6 +67,9 @@ export async function middleware(request: NextRequest) {
   const communityId = resolveCommunityFromHost(request.headers.get("host"));
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-community-id", communityId);
+  // Stamp the pathname so layouts can read it via headers() without
+  // relying on unreliable x-invoke-path / next-url headers.
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

@@ -32,10 +32,11 @@ export default async function AdminLayout({
 
   // Check which pathname we're on — if the user hasn't picked a community
   // yet AND they're not already on the switcher page, bounce them there.
+  // x-pathname is stamped by middleware on every request, making it the
+  // only reliable source of the current path inside a layout.
   const h = await headers();
-  const pathname =
-    h.get("x-invoke-path") ?? h.get("next-url") ?? h.get("referer") ?? "";
-  const isOnSwitcher = pathname.includes("/admin/communities");
+  const pathname = h.get("x-pathname") ?? "";
+  const isOnSwitcher = pathname.startsWith("/admin/communities");
   const needsToPick =
     (ctx.isSuperAdmin || ctx.communities.length > 1) &&
     !ctx.currentCommunityId &&
