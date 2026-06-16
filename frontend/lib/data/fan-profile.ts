@@ -40,6 +40,15 @@ export interface PublicCommunity {
   name: string;
 }
 
+export interface PublicPost {
+  id: string;
+  title: string | null;
+  body: string | null;
+  createdAt: string;
+  artistSlug: string | null;
+  artistName: string | null;
+}
+
 export interface PublicFanProfile {
   profileSlug: string;
   firstName: string | null;
@@ -51,6 +60,7 @@ export interface PublicFanProfile {
   founderBadges: PublicFounderBadge[];
   badges: PublicBadge[];
   communities: PublicCommunity[];
+  recentPosts: PublicPost[];
 }
 
 export async function getFanProfileBySlug(
@@ -70,7 +80,7 @@ export async function getFanProfileBySlug(
   if (fanError || !fan) return null;
   if (fan.public_profile_enabled === false) return null;
 
-  const [founderRes, badgesRes, followingRes] = await Promise.all([
+  const [founderRes, badgesRes, followingRes, postsRes] = await Promise.all([
     admin
       .from("fan_community_memberships")
       .select(
@@ -88,6 +98,13 @@ export async function getFanProfileBySlug(
       .from("fan_artist_following")
       .select("artists!inner ( slug, name )")
       .eq("fan_id", fan.id),
+    admin
+      .from("community_posts")
+      .select("id, title, body, created_at, artist_slug, artists ( name )")
+      .eq("author_id", fan.id)
+      .eq("kind", "post")
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
 
   type FounderRow = {
@@ -105,10 +122,19 @@ export async function getFanProfileBySlug(
     badges: { slug: string; name: string; description: string | null };
   };
   type FollowRow = { artists: { slug: string; name: string } };
+  type PostRow = {
+    id: string;
+    title: string | null;
+    body: string | null;
+    created_at: string;
+    artist_slug: string | null;
+    artists: { name: string } | null;
+  };
 
   const founders = (founderRes.data ?? []) as unknown as FounderRow[];
   const badges = (badgesRes.data ?? []) as unknown as BadgeRow[];
   const following = (followingRes.data ?? []) as unknown as FollowRow[];
+  const posts = (postsRes.data ?? []) as unknown as PostRow[];
 
   return {
     profileSlug: fan.profile_slug as string,
@@ -134,6 +160,14 @@ export async function getFanProfileBySlug(
     communities: following.map((f) => ({
       slug: f.artists.slug,
       name: f.artists.name,
+    })),
+    recentPosts: posts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      body: p.body,
+      createdAt: p.created_at,
+      artistSlug: p.artist_slug,
+      artistName: p.artists?.name ?? null,
     })),
   };
 }

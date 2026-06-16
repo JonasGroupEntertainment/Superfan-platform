@@ -281,6 +281,53 @@ export default async function FanProfilePage({
           </section>
         )}
 
+      {profile.recentPosts.length > 0 && (
+        <section className="mt-12 space-y-4">
+          <h2
+            className="text-xl font-semibold"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Recent posts
+          </h2>
+          <div className="space-y-3">
+            {profile.recentPosts.map((p) => (
+              <div
+                key={p.id}
+                className="rounded-2xl border border-white/10 bg-black/30 p-4"
+              >
+                {p.title && (
+                  <p className="text-sm font-semibold text-white mb-1">{p.title}</p>
+                )}
+                {p.body && (
+                  <p className="text-sm text-white/75 line-clamp-3 whitespace-pre-line">
+                    {p.body}
+                  </p>
+                )}
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  {p.artistName && p.artistSlug ? (
+                    <Link
+                      href={`/artists/${p.artistSlug}`}
+                      className="text-xs text-white/40 hover:text-white/70 transition-colors"
+                    >
+                      {p.artistName} community
+                    </Link>
+                  ) : (
+                    <span />
+                  )}
+                  <p className="text-xs text-white/35">
+                    {new Date(p.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="mt-16 rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
         <p className="text-sm font-medium text-white/85">
           Want a profile of your own?
