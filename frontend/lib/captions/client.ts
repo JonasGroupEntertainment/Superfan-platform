@@ -120,7 +120,7 @@ export async function suggestCaptions(
 
 function buildSystemPrompt(): string {
   return `You are suggesting captions for a fan to use on a photo they're
-about to post in Fan Engage, a fan-club platform for music artists.
+about to post in Fan Engage, a fan experience platform for music artists.
 
 Output JSON ONLY with this exact schema, no surrounding commentary:
 

@@ -43,7 +43,7 @@ export default function FanHomeDashboard({ data, streak, recap }: { data: FanHom
             className="mt-2 text-3xl font-semibold"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Your fan club
+            Your fan experience
           </h1>
         </div>
       </header>

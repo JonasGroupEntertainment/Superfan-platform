@@ -158,7 +158,7 @@ export async function classifyContent(
  *  historical content. */
 function buildSystemPrompt(): string {
   return `You are a content moderation classifier for Fan Engage, a
-fan-club community platform for music artists. Your job is to classify
+fan experience community platform for music artists. Your job is to classify
 user-generated posts and comments by safety risk.
 
 Output JSON ONLY, with no surrounding text or commentary. Schema:

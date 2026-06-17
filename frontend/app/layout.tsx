@@ -31,15 +31,15 @@ const appUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: {
-    default: "Fan Engage — turn casual fans into real superfans",
+    default: "Fan Engage — create a real fan experience",
     template: "%s · Fan Engage",
   },
   description:
-    "The superfan platform. Follow the artists, performers, and creators you love, earn points for every fan move, and unlock real drops, members-only events, and behind-the-scenes access.",
+    "The fan experience platform. Follow the artists, performers, and creators you love, earn points for every fan move, and unlock real drops, members-only events, and behind-the-scenes access.",
   applicationName: "Fan Engage",
   keywords: [
-    "superfan",
-    "fan club",
+    "fan experience",
+    "fan experience",
     "artist community",
     "fan rewards",
     "members-only events",
@@ -52,13 +52,13 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     siteName: "Fan Engage",
-    title: "Fan Engage — turn casual fans into real superfans",
+    title: "Fan Engage — create a real fan experience",
     description:
-      "Follow artists, earn points, unlock real drops. The superfan platform built for fans who actually show up — for music, performers, comedians, podcasts, and more.",
+      "Follow artists, earn points, unlock real drops. The fan experience platform built for fans who actually show up — for music, performers, comedians, podcasts, and more.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fan Engage — turn casual fans into real superfans",
+    title: "Fan Engage — create a real fan experience",
     description:
       "Follow the artists, performers, and creators you love. Earn points, unlock drops, show up.",
   },

@@ -159,7 +159,7 @@ CRITICAL RULES:
   * Use ONLY facts from the inputs above. Don't invent songs, dates, venues, or quotes.
   * If upcoming events are empty and there's nothing fresh to say, write a short check-in post about the fan comments above (not announcing anything).
   * Don't repeat topics from RECENT ADMIN POSTS.
-  * Don't make promises on the artist's behalf (e.g. "I'll be at..."). Frame as inclusive ("we", "the band", "fan club").
+  * Don't make promises on the artist's behalf (e.g. "I'll be at..."). Frame as inclusive ("we", "the band", "fan experience").
   * Use "announcement" kind only when the post is sharing a real upcoming event. Otherwise use "post".
   * Keep body 60-180 words. Conversational, fellow-fan energy. No exclamation points stacked at the end.
 
@@ -168,7 +168,7 @@ Output JSON, nothing else.`);
   return parts.join("\n");
 }
 
-const SYSTEM_PROMPT = `You draft community posts for music artists' fan-club platforms. You're the artist's ghostwriter — friendly, on-brand, never inventing.
+const SYSTEM_PROMPT = `You draft community posts for music artists' fan experience platforms. You're the artist's ghostwriter — friendly, on-brand, never inventing.
 
 Your job: take the provided inputs (upcoming events, recent admin posts, fan comments) and write ONE candidate post. The artist's admin will review and approve before it ships.
 
@@ -176,6 +176,6 @@ Style: warm, brief, fellow-fan voice. Match the tone of recent admin posts when 
 
 Hard rules:
   * NEVER invent events, dates, venues, songs, or quotes. Use only what's provided.
-  * NEVER promise on the artist's behalf. Use "we", "the band", "the fan club" rather than "I".
+  * NEVER promise on the artist's behalf. Use "we", "the band", "the fan experience" rather than "I".
   * NEVER repeat a topic from RECENT ADMIN POSTS. Diversify.
   * Output JSON only — no markdown fences, no commentary.`;

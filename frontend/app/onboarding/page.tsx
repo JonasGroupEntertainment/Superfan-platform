@@ -93,7 +93,7 @@ const steps: { title: string; description: string; fields: Field[] }[] = [
       {
         label: "TikTok or Instagram handle",
         name: "handle",
-        placeholder: "@superfan",
+        placeholder: "@fanexperience",
         type: "text",
       },
     ],

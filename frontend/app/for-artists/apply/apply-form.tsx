@@ -110,7 +110,7 @@ export default function ApplyForm() {
           name="goals_note"
           textarea
           maxLength={500}
-          placeholder="Tell us about your fan club, first drop, or engagement goals (optional)."
+          placeholder="Tell us about your fan experience, first drop, or engagement goals (optional)."
           hint="Optional — up to 500 characters."
         />
       </div>

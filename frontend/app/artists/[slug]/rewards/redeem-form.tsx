@@ -63,7 +63,7 @@ export function RedeemForm({
     process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app";
   const artistUrl = `${appUrl}/artists/${artistSlug}`;
   const shareTitle = `I just redeemed ${rewardTitle} on Fan Engage`;
-  const shareText = `Cashed in ${pointCost.toLocaleString()} points for ${rewardTitle} from ${artistName}'s fan club. ${artistUrl}`;
+  const shareText = `Cashed in ${pointCost.toLocaleString()} points for ${rewardTitle} from ${artistName}'s fan experience. ${artistUrl}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">

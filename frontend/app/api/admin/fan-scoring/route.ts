@@ -1,7 +1,7 @@
 /**
  * GET /api/admin/fan-scoring?artist_slug=blake-richardson&limit=500&offset=0
  *
- * Exposes per-fan scoring inputs for the Super Fan Initiative (JGF-1286).
+ * Exposes per-fan scoring inputs for the Fan Experience Initiative (JGF-1286).
  * Returns raw behavioral data — NOT computed scores. Scoring runs in the
  * downstream pipeline once legal clears (JGF-1286 legal gate).
  *

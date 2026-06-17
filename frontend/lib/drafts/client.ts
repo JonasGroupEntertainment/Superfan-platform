@@ -118,7 +118,7 @@ export async function generateCommentDrafts(
 
 function buildSystemPrompt(): string {
   return `You are drafting reply options for a fan to leave on a community
-post in Fan Engage, a fan-club platform for music artists. Your job is
+post in Fan Engage, a fan experience platform for music artists. Your job is
 to give the fan 3 short, distinct reply options they can pick from and
 edit.
 

@@ -118,7 +118,7 @@ export default async function PremiumPage({
 
         {/* Header */}
         <p className="text-xs uppercase tracking-widest text-white/50">
-          Premium Fan Club
+          Premium Fan Experience
         </p>
         <h1
           className="mt-3 text-4xl font-semibold md:text-5xl"

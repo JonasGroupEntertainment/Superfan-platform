@@ -4,19 +4,19 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "For Artists",
   description:
-    "Launch a branded fan club on Fan Engage. Reward superfans, activate drops, promote events, and build direct fan relationships your label can't take from you.",
+    "Launch a branded fan experience on Fan Engage. Reward fans, activate drops, promote events, and build direct fan relationships your label can't take from you.",
   alternates: { canonical: "/for-artists" },
   openGraph: {
     type: "website",
     url: "/for-artists",
     siteName: "Fan Engage",
-    title: "Launch a fan club your superfans actually use",
+    title: "Launch a fan experience your fans actually use",
     description:
       "Fan Engage helps artists build direct fan relationships, reward real engagement, and turn fan activity into drops, RSVPs, referrals, and community moments — without losing the artist's voice.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Launch a fan club your superfans actually use",
+    title: "Launch a fan experience your fans actually use",
     description:
       "Direct fan relationships, real rewards, drops, RSVPs, and community — built for working artists.",
   },
@@ -50,9 +50,9 @@ export default function ForArtistsPage() {
           className="text-5xl font-semibold leading-[1.05] md:text-6xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Launch a fan club your{" "}
+          Launch a fan experience your{" "}
           <span className="bg-gradient-to-r from-aurora via-fuchsia-400 to-ember bg-clip-text text-transparent">
-            superfans
+            fans
           </span>{" "}
           actually use.
         </h1>
@@ -66,13 +66,13 @@ export default function ForArtistsPage() {
             href="/for-artists/apply"
             className="rounded-full bg-gradient-to-r from-aurora to-ember px-6 py-3 text-sm font-semibold text-white shadow-glass transition hover:brightness-110"
           >
-            Apply to launch your fan club →
+            Apply to launch your fan experience →
           </Link>
           <Link
             href="/artists"
             className="rounded-full border border-white/30 px-6 py-3 text-sm font-medium text-white/80 hover:bg-white/10"
           >
-            View live fan clubs
+            View live fan experiences
           </Link>
         </div>
         <p className="pt-2 text-xs text-white/50">
@@ -102,7 +102,7 @@ export default function ForArtistsPage() {
             Built for real artist communities.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-white/70">
-            Each artist gets a branded fan club where fans follow, earn points,
+            Each artist gets a branded fan experience where fans follow, earn points,
             unlock rewards, RSVP to events, and stay close to what&apos;s
             happening next. Browse the active clubs to see what your hub could
             look like.
@@ -113,7 +113,7 @@ export default function ForArtistsPage() {
             href="/artists"
             className="rounded-full border border-white/25 px-5 py-2.5 text-sm font-medium text-white/85 hover:bg-white/10"
           >
-            Browse all fan clubs →
+            Browse all fan experiences →
           </Link>
         </div>
       </section>
@@ -128,10 +128,10 @@ export default function ForArtistsPage() {
             className="mt-2 text-3xl font-semibold md:text-4xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Real fan clubs, real artists.
+            Real fan experiences, real artists.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-white/70">
-            A handful of the artists who built their fan club on Fan Engage.
+            A handful of the artists who built their fan experience on Fan Engage.
             Click through to see what their hub actually looks like.
           </p>
         </div>
@@ -177,7 +177,7 @@ export default function ForArtistsPage() {
                 {a.tagline}
               </p>
               <p className="mt-4 text-xs text-white/55 transition group-hover:text-white/85">
-                See their fan club →
+                See their fan experience →
               </p>
             </Link>
           ))}
@@ -250,7 +250,7 @@ export default function ForArtistsPage() {
         <p className="mt-5 max-w-3xl text-sm text-white/75">
           Fan Engage is built so artists strengthen direct fan relationships
           instead of renting attention from social platforms. You can see your
-          superfans, you can talk to them, and the contact data they share with
+          fans, you can talk to them, and the contact data they share with
           you doesn&apos;t live behind someone else&apos;s ranking algorithm.
         </p>
         <p className="mt-4 max-w-3xl text-xs text-white/55">
@@ -276,7 +276,7 @@ export default function ForArtistsPage() {
           {[
             {
               n: "1. Apply",
-              body: "Tell us about your music, your fans, and what you want a fan club to look like.",
+              body: "Tell us about your music, your fans, and what you want a fan experience to look like.",
             },
             {
               n: "2. Review",
@@ -318,7 +318,7 @@ export default function ForArtistsPage() {
           {[
             {
               q: "What does Fan Engage help artists do?",
-              a: "Build a branded fan club where fans follow, earn points, unlock drops, RSVP to events, refer friends, and stay close. You get direct fan relationships, real engagement signal, and tools that turn casual listeners into people who actually show up.",
+              a: "Build a branded fan experience where fans follow, earn points, unlock drops, RSVP to events, refer friends, and stay close. You get direct fan relationships, real engagement signal, and tools that turn casual listeners into people who actually show up.",
             },
             {
               q: "How long does launch take?",
@@ -370,7 +370,7 @@ export default function ForArtistsPage() {
           className="mt-3 text-3xl font-semibold md:text-4xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Let&apos;s build your fan club.
+          Let&apos;s build your fan experience.
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm text-white/75">
           Apply free in under five minutes. We respond within 48 hours and walk
@@ -381,13 +381,13 @@ export default function ForArtistsPage() {
             href="/for-artists/apply"
             className="rounded-full bg-gradient-to-r from-aurora to-ember px-6 py-3 text-sm font-semibold text-white shadow-glass transition hover:brightness-110"
           >
-            Apply to launch your fan club →
+            Apply to launch your fan experience →
           </Link>
           <Link
             href="/artists"
             className="rounded-full border border-white/25 px-5 py-3 text-sm font-medium text-white/80 hover:bg-white/10"
           >
-            View live fan clubs
+            View live fan experiences
           </Link>
         </div>
       </section>

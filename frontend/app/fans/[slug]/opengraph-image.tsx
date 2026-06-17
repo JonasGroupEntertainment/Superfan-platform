@@ -4,7 +4,7 @@ import { getFanProfileBySlug } from "@/lib/data/fan-profile";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Superfan profile on Fan Engage";
+export const alt = "Fan Experience profile on Fan Engage";
 
 const TIER_COLORS: Record<string, { from: string; to: string; label: string }> = {
   bronze: { from: "#a16207", to: "#fbbf24", label: "Bronze" },
@@ -20,7 +20,7 @@ export default async function FanProfileOpengraphImage({
 }) {
   const profile = await getFanProfileBySlug(params.slug).catch(() => null);
 
-  const displayName = profile?.firstName ?? "Superfan";
+  const displayName = profile?.firstName ?? "Fan";
   const slug = profile?.profileSlug ?? params.slug;
   const tier = TIER_COLORS[(profile?.tier ?? "bronze").toLowerCase()] ?? TIER_COLORS.bronze;
   const points = profile?.totalPoints ?? 0;
@@ -92,7 +92,7 @@ export default async function FanProfileOpengraphImage({
               letterSpacing: "-0.04em", maxWidth: 1040,
             }}
           >
-            {displayName}&apos;s superfan profile
+            {displayName}&apos;s fan experience profile
           </div>
           {founderCount > 0 ? (
             <div

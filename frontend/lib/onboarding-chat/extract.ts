@@ -98,7 +98,7 @@ Schema:
 Rules:
   * city: city name only (no state). Null if not mentioned or unclear.
   * music_outlet: song title only, no quotes. Null if not mentioned.
-  * interest: 1-2 sentence summary of what the fan said about the artist or what they're hoping for from the fan club. Null if they didn't say anything substantive.
+  * interest: 1-2 sentence summary of what the fan said about the artist or what they're hoping for from the fan experience. Null if they didn't say anything substantive.
   * sms_opted_in: true if they clearly said yes to SMS / texts / tour notifications. false if they declined. Null if not asked or ambiguous.
   * Don't infer beyond what the fan actually said. Empty answers → null.
   * If the fan said "I don't know" or skipped a topic, that field is null.

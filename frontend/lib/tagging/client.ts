@@ -143,7 +143,7 @@ export async function classifyTags(input: TagInput): Promise<CanonicalTag[]> {
 }
 
 function buildSystemPrompt(): string {
-  return `You classify posts in Fan Engage, a music fan-club community
+  return `You classify posts in Fan Engage, a music fan experience community
 platform. Each post gets 1-4 tags from a CLOSED VOCABULARY. Output
 JSON ONLY with this schema:
 

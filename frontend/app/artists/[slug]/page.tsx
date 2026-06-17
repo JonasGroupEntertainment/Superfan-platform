@@ -98,11 +98,11 @@ export default async function ArtistPage({
   const ctaGradient = `linear-gradient(to right, ${artist.accentFrom}, ${artist.accentTo})`;
 
   // Primary CTA adapts to the viewer's state:
-  // - anonymous  → "Join the fan club" → /onboarding?ref=<slug>
+  // - anonymous  → "Join the Fan Experience" → /onboarding?ref=<slug>
   // - signed in, no profile → "Complete profile" → /onboarding?ref=<slug>
   // - signed in, profile done → "Shop drops" → /marketplace
   const primaryCta = !isSignedIn
-    ? { label: "Join the fan club", href: `/signup?ref=${artist.slug}` }
+    ? { label: "Join the Fan Experience", href: `/signup?ref=${artist.slug}` }
     : needsProfile
       ? { label: "Complete your profile", href: `/onboarding?ref=${artist.slug}` }
       : { label: "Shop drops", href: "/marketplace" };
@@ -174,7 +174,7 @@ export default async function ArtistPage({
             )}
             <ShareButton
               title={`Check out ${artist.name} on Fan Engage`}
-              text={`${artist.name} — ${artist.tagline ?? "fan club on Fan Engage"}`}
+              text={`${artist.name} — ${artist.tagline ?? "fan experience on Fan Engage"}`}
               url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app"}/artists/${artist.slug}`}
               label="Share"
               variant="ghost"
@@ -335,7 +335,7 @@ export default async function ArtistPage({
 
       {/* Merch */}
       <section className="glass-card p-8">
-        <p className="text-sm uppercase tracking-wide text-white/60">Fan club rewards</p>
+        <p className="text-sm uppercase tracking-wide text-white/60">Fan Experience rewards</p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {artist.merch.map((m) => (
             <div key={m.title} className="rounded-2xl bg-black/30 p-5">

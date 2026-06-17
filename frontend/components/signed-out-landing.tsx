@@ -38,7 +38,7 @@ export default function SignedOutLanding({
           <div className="flex flex-col justify-center">
             <p className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-white/70">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              The superfan platform
+              The fan experience platform
             </p>
             <h1
               className="text-5xl font-semibold leading-[1.05] md:text-6xl"
@@ -47,7 +47,7 @@ export default function SignedOutLanding({
               Turn casual fans
               <br />
               <span className="bg-gradient-to-r from-aurora via-fuchsia-400 to-ember bg-clip-text text-transparent">
-                into real superfans.
+                into real fan experiences.
               </span>
             </h1>
             <p className="mt-6 max-w-xl text-lg text-white/70">
@@ -162,7 +162,7 @@ export default function SignedOutLanding({
           className="mt-2 max-w-2xl text-3xl font-semibold md:text-4xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Three steps from lurker to superfan.
+          Three steps from casual fan to fan experience.
         </h2>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {[
@@ -216,7 +216,7 @@ export default function SignedOutLanding({
               >
                 More than a mailing list.
                 <br />
-                A real fan club.
+                A real fan experience.
               </h2>
               <p className="mt-6 max-w-md text-white/70">
                 Everything in one place — events, community, rewards, and the

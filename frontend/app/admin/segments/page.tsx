@@ -79,7 +79,7 @@ export default async function AdminSegmentsPage() {
               name="name"
               required
               maxLength={80}
-              placeholder="Tennessee superfans"
+              placeholder="Tennessee fan experiences"
               className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm placeholder-white/40 outline-none focus:border-aurora/40"
             />
           </div>

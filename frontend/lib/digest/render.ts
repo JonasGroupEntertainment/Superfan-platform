@@ -92,7 +92,7 @@ function renderHtml(payload: DigestPayload): string {
   lines.push(`<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111; line-height: 1.55;">`);
   lines.push(`<p style="margin:0 0 16px 0;">${greeting}</p>`);
   lines.push(
-    `<p style="margin:0 0 24px 0;">Here's what's been happening in your fan clubs this week.</p>`,
+    `<p style="margin:0 0 24px 0;">Here's what's been happening in your fan experiences this week.</p>`,
   );
 
   for (const block of payload.communities) {
@@ -206,7 +206,7 @@ function renderText(payload: DigestPayload): string {
   const lines: string[] = [];
   lines.push(greeting);
   lines.push("");
-  lines.push(`Here's what's been happening in your fan clubs this week.`);
+  lines.push(`Here's what's been happening in your fan experiences this week.`);
   lines.push("");
   lines.push("---");
   lines.push("");

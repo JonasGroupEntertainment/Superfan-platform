@@ -35,10 +35,10 @@ export async function generateMetadata({
   const name = profile.firstName ?? profile.profileSlug;
   const founderCount = profile.founderBadges.length;
   const desc = founderCount
-    ? `${name}'s superfan profile · ${getTierStyle(profile.tier).label} tier · Founder for ${profile.founderBadges
+    ? `${name}'s fan experience profile · ${getTierStyle(profile.tier).label} tier · Founder for ${profile.founderBadges
         .map((f) => f.communityName)
         .join(", ")}`
-    : `${name}'s superfan profile · ${getTierStyle(profile.tier).label} tier · ${profile.totalPoints.toLocaleString()} points`;
+    : `${name}'s fan experience profile · ${getTierStyle(profile.tier).label} tier · ${profile.totalPoints.toLocaleString()} points`;
 
   return {
     title: `${name}`,
@@ -48,12 +48,12 @@ export async function generateMetadata({
       type: "profile",
       url: `/fans/${profile.profileSlug}`,
       siteName: "Fan Engage",
-      title: `${name}'s superfan profile`,
+      title: `${name}'s fan experience profile`,
       description: desc,
     },
     twitter: {
       card: "summary_large_image",
-      title: `${name}'s superfan profile`,
+      title: `${name}'s fan experience profile`,
       description: desc,
     },
   };
@@ -74,7 +74,7 @@ export default async function FanProfilePage({
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app";
   const profileUrl = `${appUrl}/fans/${profile.profileSlug}`;
-  const shareTitle = `${displayName}'s superfan profile on Fan Engage`;
+  const shareTitle = `${displayName}'s fan experience profile on Fan Engage`;
   const founderLine = profile.founderBadges.length
     ? `Founder for ${profile.founderBadges.map((f) => f.communityName).join(", ")}.`
     : "";
@@ -333,7 +333,7 @@ export default async function FanProfilePage({
           Want a profile of your own?
         </p>
         <p className="mt-1 text-xs text-white/55">
-          Follow artists, earn points, unlock drops and badges. Your superfan
+          Follow artists, earn points, unlock drops and badges. Your fan experience
           profile builds itself.
         </p>
         <Link

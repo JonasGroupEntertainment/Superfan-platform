@@ -103,7 +103,7 @@ async function summarizeOne(
 
 function buildSystemPrompt(): string {
   return `You write very short "vibe of the week" summaries for a music
-fan-club platform's email digest.
+fan experience platform's email digest.
 
 Output exactly ONE sentence, 12-22 words, no leading "This week" or
 "Here's what happened". Lead with a verb or a specific reference. Avoid

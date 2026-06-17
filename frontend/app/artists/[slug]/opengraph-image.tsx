@@ -25,7 +25,7 @@ export default async function ArtistOpengraphImage({
   // worse than a generic one.
   const name = artist?.name ?? "Fan Engage";
   const tagline =
-    artist?.tagline ?? "The superfan platform built for fans who actually show up.";
+    artist?.tagline ?? "The fan experience platform built for fans who actually show up.";
   const accentFrom = artist?.accentFrom ?? "#7c3aed";
   const accentTo = artist?.accentTo ?? "#fb923c";
   const heroImage = artist?.heroImage ?? null;
@@ -131,7 +131,7 @@ export default async function ArtistOpengraphImage({
               color: "rgba(255,255,255,0.7)",
             }}
           >
-            Fan Club
+            Fan Experience
           </div>
           <div
             style={{
@@ -161,7 +161,7 @@ export default async function ArtistOpengraphImage({
           ) : null}
         </div>
 
-        {/* Footer row — "Join the fan club" CTA pill. */}
+        {/* Footer row — "Join the Fan Experience" CTA pill. */}
         <div
           style={{
             display: "flex",
@@ -196,7 +196,7 @@ export default async function ArtistOpengraphImage({
               color: "white",
             }}
           >
-            Join the fan club →
+            Join the Fan Experience →
           </div>
         </div>
       </div>

@@ -5,15 +5,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const metadata = {
   title: "Artists",
   description:
-    "Browse artist fan clubs on Fan Engage and discover rewards, drops, events, and member-only experiences. Follow the artists you love.",
+    "Browse artist fan experiences on Fan Engage and discover rewards, drops, events, and member-only experiences. Follow the artists you love.",
   alternates: { canonical: "/artists" },
   openGraph: {
     type: "website",
     url: "/artists",
     siteName: "Fan Engage",
-    title: "Artist fan clubs",
+    title: "Artist Fan Experiences",
     description:
-      "Follow artists, earn points, and unlock drops on every fan club hosted by Fan Engage.",
+      "Follow artists, earn points, and unlock drops on every fan experience hosted by Fan Engage.",
   },
 };
 
@@ -45,7 +45,7 @@ export default async function ArtistsIndexPage({ searchParams }: { searchParams?
       <header className="space-y-2">
         <p className="text-sm uppercase tracking-wide text-white/60">Artists</p>
         <h1 className="text-3xl font-semibold" style={{ fontFamily: "var(--font-display)" }}>
-          Fan clubs on Fan Engage
+          Fan Experiences on Fan Engage
         </h1>
         <p className="max-w-2xl text-sm text-white/70">
           Each artist has a dedicated hub with rewards, drops, and backstage access for their fans.
@@ -153,7 +153,7 @@ export default async function ArtistsIndexPage({ searchParams }: { searchParams?
                   </p>
                 )}
                 <span className="mt-3 inline-flex text-sm text-white/90 transition group-hover:text-white">
-                  Enter fan club →
+                  Enter Fan Experience →
                 </span>
               </div>
             </div>

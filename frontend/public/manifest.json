@@ -1,7 +1,7 @@
 {
   "name": "Fan Engage",
   "short_name": "Fan Engage",
-  "description": "Your fan club — rewards, community, and artist drops.",
+  "description": "Your fan experience — rewards, community, and artist drops.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -95,7 +95,7 @@ export async function summarizeThread(
 }
 
 function buildSystemPrompt(): string {
-  return `You write very short thread summaries for a music fan-club platform's community pages.
+  return `You write very short thread summaries for a music fan experience platform's community pages.
 
 Output 2-3 sentences, total under 60 words. Lead with the topic, then the dominant takeaways or reactions. No preamble like "This thread", "In this discussion". No bullet lists. No emoji. No exclamation points.
 

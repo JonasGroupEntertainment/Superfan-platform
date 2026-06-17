@@ -106,7 +106,7 @@ export default async function FounderSharePage({
               href={`/artists/${artist.slug}`}
               className="rounded-full border border-white/30 px-5 py-2.5 text-sm font-medium text-white/85 hover:bg-white/10"
             >
-              Visit fan club →
+              Visit fan experience →
             </Link>
           </div>
         </div>

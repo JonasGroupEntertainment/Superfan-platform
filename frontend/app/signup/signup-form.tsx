@@ -26,7 +26,7 @@ export function SignupForm({
   const ref = searchParams.get("ref");
   // Where to send the user after a successful signup. Preserve any
   // ?ref=<artist-slug> attribution from the artist-page Join CTA so the
-  // welcome flow knows which fan club they came from.
+  // welcome flow knows which fan experience they came from.
   const onboardingHref = ref ? `/onboarding?ref=${encodeURIComponent(ref)}` : "/onboarding";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -114,7 +114,7 @@ export function SignupForm({
           }}
         >
           <p className="text-xs uppercase tracking-[0.3em] text-white/70">
-            Fan club
+            Fan Experience
           </p>
           <h2
             className="mt-2 text-2xl font-semibold"
@@ -126,7 +126,7 @@ export function SignupForm({
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: ctaGradient }}
             >
-              fan club
+              fan experience
             </span>
           </h2>
           {referrerArtist.tagline && (
@@ -333,7 +333,7 @@ export function SignupForm({
             href="/for-artists/apply"
             className="text-white underline-offset-4 hover:underline"
           >
-            Apply to launch your fan club →
+            Apply to launch your fan experience →
           </Link>
         </p>
       </div>

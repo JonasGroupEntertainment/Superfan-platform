@@ -76,7 +76,7 @@ export async function summarizeAdminBrief(
 
 function buildSystemPrompt(): string {
   return `You are an analyst writing a daily admin brief for Fan Engage,
-a fan-club platform for music artists. Your readers are the platform
+a fan experience platform for music artists. Your readers are the platform
 admins — they want to know what's working, what's slipping, and what's
 weird. They will read this in Slack between meetings.
 

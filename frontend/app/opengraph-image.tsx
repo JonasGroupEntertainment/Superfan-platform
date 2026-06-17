@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 // request time via Next's ImageResponse so we don't have to ship a binary.
 
 export const runtime = "edge";
-export const alt = "Fan Engage — the superfan platform";
+export const alt = "Fan Engage — the fan experience platform";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -97,7 +97,7 @@ export default async function OpengraphImage() {
             color: "rgba(255,255,255,0.7)",
           }}
         >
-          <div>The superfan platform — rewards, community, drops.</div>
+          <div>The fan experience platform — rewards, community, drops.</div>
           <div
             style={{
               display: "flex",
