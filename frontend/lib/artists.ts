@@ -65,6 +65,30 @@ export const ARTISTS: Record<string, Artist> = {
     merch: [{ title: "Debut EP Bundle", tier: "Bronze+", points: "1,800 pts" }],
     social: [],
   },
+  "bailee-madison": {
+    slug: "bailee-madison",
+    name: "Bailee Madison",
+    tagline: "Actress. Artist. Unapologetically herself.",
+    bio: 'Bailee Madison is a Fort Lauderdale–born, Nashville-raised actress and emerging music artist with over 20 years in the industry. Known for Bridge to Terabithia, Good Witch (Hallmark, 6 seasons), and Pretty Little Liars: Original Sin (HBO Max), Bailee made her music debut with the single "Kinda Fun" on Red Van Records in 2024. She is managed by Jonas Group Entertainment (music) and TFC Management (acting).',
+    heroImage: null,
+    heroFocalX: 50,
+    heroFocalY: 35,
+    accentFrom: "#8b5cf6",
+    accentTo: "#e879f9",
+    genres: ["Pop", "Indie Pop"],
+    upcoming: [
+      { title: "Roommates", detail: "Netflix Comedy Film — 2026", date: "Coming 2026" },
+      { title: "40 Dates and 40 Nights", detail: "Film — Post-production", date: "TBD" },
+    ],
+    merch: [
+      { title: '"Kinda Fun" Single Bundle', tier: "Bronze+", points: "1,800 pts" },
+      { title: "Signed Photo Print", tier: "Silver+", points: "2,800 pts" },
+    ],
+    social: [
+      { label: "Instagram", href: "https://www.instagram.com/baileemadison/" },
+      { label: "Twitter / X", href: "https://twitter.com/BaileeMadison" },
+    ],
+  },
   blake: {
     slug: "blake",
     name: "Blake",
