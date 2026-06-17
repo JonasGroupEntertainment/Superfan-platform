@@ -5,7 +5,7 @@ import Link from "next/link";
  * "Drops coming soon" card. Bump this if you want a fuller bar before
  * the marketplace is considered real.
  */
-export const MIN_INVENTORY = 3;
+export const MIN_INVENTORY = 1;
 
 interface Props {
   /** Optional artist/brand display name — when present, copy is scoped. */

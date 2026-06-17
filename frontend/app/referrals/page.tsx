@@ -97,8 +97,8 @@ export default async function ReferralsPage() {
 
                 {myCount === 0 ? (
                   <div className="mt-6 rounded-2xl border border-dashed border-purple-500/40 bg-purple-900/20 px-5 py-4 text-sm text-white/80">
-                    <span className="font-semibold text-purple-300">Earn 500 points</span> for every
-                    friend who goes Premium — share your link above to get started.
+                    <span className="font-semibold text-purple-300">Earn 150 points</span> for every
+                    verified signup — share your link above to get started.
                   </div>
                 ) : (
                   <div className="mt-6 grid grid-cols-3 gap-3 text-center">

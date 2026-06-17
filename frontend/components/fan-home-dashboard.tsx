@@ -16,7 +16,7 @@ import { focalPointStyle } from "@/lib/images/focal-point";
  * above the existing marketing content. All data comes from getFanHomeData()
  * so there are no client-side fetches here.
  */
-export default function FanHomeDashboard({ data, streak, recap }: { data: FanHomeData; streak?: { currentStreakDays: number; longestStreakDays: number; pointsAwardedThisVisit: number; newMilestone: number | null; isNewToday: boolean; lastActiveDate: string | null } | null; recap?: WeeklyRecap | null }) {
+export default function FanHomeDashboard({ data, streak, recap, totalPoints }: { data: FanHomeData; streak?: { currentStreakDays: number; longestStreakDays: number; pointsAwardedThisVisit: number; newMilestone: number | null; isNewToday: boolean; lastActiveDate: string | null } | null; recap?: WeeklyRecap | null; totalPoints?: number | null }) {
   const {
     fan,
     followedArtists,
@@ -93,7 +93,7 @@ export default function FanHomeDashboard({ data, streak, recap }: { data: FanHom
       {/* Spend your points card */}
       <SpendPointsCard
         primaryCommunity={primaryCommunity}
-        points={fan.total_points}
+        points={totalPoints ?? fan.total_points}
       />
     </section>
   );
