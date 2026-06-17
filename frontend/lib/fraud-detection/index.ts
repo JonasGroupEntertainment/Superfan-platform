@@ -341,7 +341,7 @@ function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s;
 }
 
-const SYSTEM_PROMPT = `You're a fraud analyst for a fan experience platform. The platform pays fans points for community engagement (posts, comments, polls). Some fans may try to farm points or create sock-puppet accounts.
+const SYSTEM_PROMPT = `You're a fraud analyst for a fan-club platform. The platform pays fans points for community engagement (posts, comments, polls). Some fans may try to farm points or create sock-puppet accounts.
 
 Your job: review the activity below and decide if this looks legitimate, suspicious, or unclear.
 
