@@ -59,7 +59,7 @@ export async function GET(req: Request) {
   // Pull active artists, oldest-first so quiet ones get attention
   const { data: artistRows, error: artistsErr } = await admin
     .from("artists")
-    .select("slug, name, is_active, created_at")
+    .select("slug, name, active, created_at")
     .eq("active", true)
     .order("created_at", { ascending: true })
     .limit(200);
