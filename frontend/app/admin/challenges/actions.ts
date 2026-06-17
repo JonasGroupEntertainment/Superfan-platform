@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminUser } from "@/lib/admin";
+import { awardPoints } from "@/lib/points/award";
 import { createNotification } from "@/lib/data/notifications";
 
 const WINNER_BONUS_POINTS = 200;
@@ -41,23 +42,13 @@ export async function pickWinnerAction(formData: FormData) {
     .eq("source_ref", refId)
     .limit(1);
   if (!ledgerExists || ledgerExists.length === 0) {
-    await supa.from("points_ledger").insert({
-      fan_id: fanId,
+    await awardPoints(supa, {
+      fanId,
       delta: WINNER_BONUS_POINTS,
       source: "challenge",
-      source_ref: refId,
+      sourceRef: refId,
       note: "Challenge winner bonus",
     });
-    // Fetch + update fan total_points (trigger will auto-promote tier)
-    const { data: fanRow } = await supa
-      .from("fans")
-      .select("total_points")
-      .eq("id", fanId)
-      .maybeSingle();
-    await supa
-      .from("fans")
-      .update({ total_points: (fanRow?.total_points ?? 0) + WINNER_BONUS_POINTS })
-      .eq("id", fanId);
   }
 
   // In-app notification for the winner — same dedup_key pattern as the

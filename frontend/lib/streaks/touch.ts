@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { awardPoints } from "@/lib/points/award";
 
 /**
  * Daily streak touch — call once per Fan Home render.
@@ -145,21 +146,39 @@ export async function touchStreak(fanId: string): Promise<StreakState> {
 
     const totalAwarded = dailyBonus + milestoneBonus;
     const newLongest = Math.max(longestSoFar, currentStreak);
-    const newPoints = (fan.total_points as number) + totalAwarded;
 
-    // 1. Update fan row
+    // 1. Update fan streak fields (not points — awardPoints handles that)
     const updates: Record<string, unknown> = {
       current_streak_days: currentStreak,
       longest_streak_days: newLongest,
       last_active_date: todayDateStr,
-      total_points: newPoints,
     };
     if (eventType === "first_visit" || eventType === "reset") {
       updates.streak_started_at = today.toISOString();
     }
     await admin.from("fans").update(updates).eq("id", fanId);
 
-    // 2. Audit log
+    // 2. Award points via shared utility (updates fans + fan_community_memberships)
+    if (totalAwarded > 0) {
+      await awardPoints(admin, {
+        fanId,
+        delta: dailyBonus,
+        source: "daily_checkin",
+        sourceRef: `streak:${fanId}:${todayDateStr}`,
+        note: `Day ${currentStreak} streak bonus`,
+      });
+      if (milestoneBonus > 0 && milestoneHit) {
+        await awardPoints(admin, {
+          fanId,
+          delta: milestoneBonus,
+          source: "manual_adjustment",
+          sourceRef: `streak-milestone:${fanId}:${milestoneHit}`,
+          note: `Streak milestone: ${milestoneHit} days`,
+        });
+      }
+    }
+
+    // 3. Audit log
     await admin.from("streak_log").insert([
       {
         fan_id: fanId,

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fanDataRateLimiter, getClientIp } from "@/lib/rate-limit";
+import { awardPoints } from "@/lib/points/award";
 
 export const runtime = "nodejs";
 
@@ -134,19 +135,13 @@ export async function POST(request: NextRequest) {
             },
             { onConflict: "referred_id" },
           );
-          await admin.from("points_ledger").insert({
-            fan_id: referrer.id,
+          await awardPoints(admin, {
+            fanId: referrer.id,
             delta: 150,
             source: "referral",
-            source_ref: user.id,
+            sourceRef: user.id,
             note: `Referred by ${user.email}`,
           });
-          await admin
-            .from("fans")
-            .update({
-              total_points: ((await getTotal(admin, referrer.id)) ?? 0) + 150,
-            })
-            .eq("id", referrer.id);
           await admin
             .from("fans")
             .update({ referred_by: referrer.id })
@@ -170,18 +165,13 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (!existing) {
-        await admin.from("points_ledger").insert({
-          fan_id: user.id,
+        await awardPoints(admin, {
+          fanId: user.id,
           delta: 100,
           source: "signup_bonus",
-          source_ref: sourceRef,
+          sourceRef: sourceRef,
           note: "Welcome to Fan Engage",
         });
-        const newTotal = ((await getTotal(admin, user.id)) ?? 0) + 100;
-        await admin
-          .from("fans")
-          .update({ total_points: newTotal })
-          .eq("id", user.id);
       }
     } catch (err) {
       console.warn("onboard: signup bonus failed", err);

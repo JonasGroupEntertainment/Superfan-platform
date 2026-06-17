@@ -3,6 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminContext } from "@/lib/admin";
 import { redirect } from "next/navigation";
+import { awardPoints } from "@/lib/points/award";
 
 export async function createRewardAction(formData: FormData) {
   const ctx = await getAdminContext();
@@ -158,28 +159,14 @@ export async function cancelRedemptionAction(
     return { error: updateError.message };
   }
 
-  // Refund points: read current, then update.
-  const { data: currentFan } = await supabase
-    .from("fans")
-    .select("total_points")
-    .eq("id", fanId)
-    .maybeSingle();
-  const currentPoints = (currentFan?.total_points as number | null) ?? 0;
-  const { error: pointsError } = await supabase
-    .from("fans")
-    .update({ total_points: currentPoints + pointCost })
-    .eq("id", fanId);
-
-  // Ledger entry for audit trail.
-  await supabase.from("points_ledger").insert([
-    {
-      fan_id: fanId,
-      delta: pointCost,
-      source: "reward_redemption",
-      source_ref: `redemption:${redemptionId}:refund`,
-      note: `Refunded: redemption cancelled`,
-    },
-  ]);
+  // Refund points via shared utility (updates fans + fan_community_memberships).
+  const pointsError = await awardPoints(supabase, {
+    fanId,
+    delta: pointCost,
+    source: "reward_redemption",
+    sourceRef: `redemption:${redemptionId}:refund`,
+    note: `Refunded: redemption cancelled`,
+  }).then(() => null).catch((e: Error) => e);
 
   if (pointsError) {
     return { error: pointsError.message };
