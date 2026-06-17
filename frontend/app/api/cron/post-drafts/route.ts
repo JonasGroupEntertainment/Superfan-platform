@@ -60,7 +60,7 @@ export async function GET(req: Request) {
   const { data: artistRows, error: artistsErr } = await admin
     .from("artists")
     .select("slug, name, is_active, created_at")
-    .eq("is_active", true)
+    .eq("active", true)
     .order("created_at", { ascending: true })
     .limit(200);
 
