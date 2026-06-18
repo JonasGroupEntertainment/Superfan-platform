@@ -86,7 +86,7 @@ export async function importFansAction(
     } else {
       const { data: inserted, error } = await admin
         .from("fans")
-        .insert({ email, ...patch })
+        .insert({ id: crypto.randomUUID(), email, ...patch })
         .select("id")
         .maybeSingle();
       if (error) {
