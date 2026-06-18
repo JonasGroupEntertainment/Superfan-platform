@@ -40,7 +40,7 @@ const COMMUNITIES = [
   { slug: "raelynn", label: "RaeLynn" },
   { slug: "danger-twins", label: "Danger Twins · Amy Stroup" },
   { slug: "hunter-hawkins", label: "Hunter Hawkins" },
-  { slug: "jonas-group", label: "Team Jonas Group" },
+  { slug: "teamjonasgroup", label: "Team Jonas Group" },
   { slug: "nellies", label: "Nellies" },
 ];
 
