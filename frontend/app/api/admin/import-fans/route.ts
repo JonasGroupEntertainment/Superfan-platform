@@ -49,18 +49,28 @@ export async function POST(request: NextRequest) {
       }
       result.updated++;
     } else {
+      let authUserId: string | null = null;
       const { data: authData, error: authError } = await admin.auth.admin.createUser({
         email,
         email_confirm: true,
       });
       if (authError) {
-        result.errors.push({ row: row._rowIndex ?? i + 2, email, reason: authError.message });
-        result.skipped++;
-        continue;
+        // User may already exist in auth but not in fans — look them up
+        const { data: userList } = await admin.auth.admin.listUsers();
+        const existingAuthUser = userList?.users?.find((u) => u.email === email);
+        if (existingAuthUser) {
+          authUserId = existingAuthUser.id;
+        } else {
+          result.errors.push({ row: row._rowIndex ?? i + 2, email, reason: authError.message });
+          result.skipped++;
+          continue;
+        }
+      } else {
+        authUserId = authData.user.id;
       }
       const { data: inserted, error } = await admin
         .from("fans")
-        .insert({ id: authData.user.id, email, ...patch })
+        .upsert({ id: authUserId, email, ...patch }, { onConflict: "id" })
         .select("id")
         .maybeSingle();
       if (error) {
