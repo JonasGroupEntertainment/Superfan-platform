@@ -76,8 +76,23 @@ export default function FanImportPage() {
     if (!preview.length) return;
     setStatus("importing");
     try {
-      const res = await importFansAction(preview, communityId || undefined);
-      setResult(res);
+      const CHUNK = 25;
+      const totals = { created: 0, updated: 0, skipped: 0, errors: [] as { row: number; email: string; reason: string }[] };
+      for (let i = 0; i < preview.length; i += CHUNK) {
+        const chunk = preview.slice(i, i + CHUNK).map((r, j) => ({ ...r, _rowIndex: i + j + 2 }));
+        const res = await fetch("/api/admin/import-fans", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rows: chunk, communityId: communityId || undefined }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        totals.created += data.created;
+        totals.updated += data.updated;
+        totals.skipped += data.skipped;
+        totals.errors.push(...(data.errors ?? []));
+      }
+      setResult({ total: preview.length, ...totals });
       setStatus("done");
     } catch (e) {
       setStatus("error");
