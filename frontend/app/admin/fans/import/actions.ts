@@ -84,9 +84,21 @@ export async function importFansAction(
         result.updated++;
       }
     } else {
+      // Create an auth user first (no email sent — email_confirm skips verification)
+      const { data: authData, error: authError } = await admin.auth.admin.createUser({
+        email,
+        email_confirm: true,
+      });
+      if (authError) {
+        result.errors.push({ row: i + 2, email, reason: authError.message });
+        result.skipped++;
+        continue;
+      }
+      const authUserId = authData.user.id;
+
       const { data: inserted, error } = await admin
         .from("fans")
-        .insert({ id: crypto.randomUUID(), email, ...patch })
+        .insert({ id: authUserId, email, ...patch })
         .select("id")
         .maybeSingle();
       if (error) {
