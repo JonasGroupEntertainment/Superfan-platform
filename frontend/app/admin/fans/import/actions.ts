@@ -24,9 +24,12 @@ export interface ImportResult {
  * Upserts fans from a parsed CSV. Matches on email — creates a new fan row
  * if none exists, otherwise merges the supplied fields in (never overwrites
  * with blank values). Social handles land in fans.socials jsonb.
+ * If communityId is provided, also creates/upserts a fan_community_memberships
+ * row to segment the fan to that artist community. No emails are sent.
  */
 export async function importFansAction(
   rows: ImportRow[],
+  communityId?: string,
 ): Promise<ImportResult> {
   await getAdminUser();
   const admin = createAdminClient();
@@ -66,6 +69,8 @@ export async function importFansAction(
     if (row.phone?.trim()) patch.phone = row.phone.trim();
     if (row.city?.trim()) patch.city = row.city.trim();
 
+    let fanId: string | null = existing?.id ?? null;
+
     if (existing) {
       const { error } = await admin
         .from("fans")
@@ -74,19 +79,41 @@ export async function importFansAction(
       if (error) {
         result.errors.push({ row: i + 2, email, reason: error.message });
         result.skipped++;
+        continue;
       } else {
         result.updated++;
       }
     } else {
-      const { error } = await admin
+      const { data: inserted, error } = await admin
         .from("fans")
-        .insert({ email, ...patch });
+        .insert({ email, ...patch })
+        .select("id")
+        .maybeSingle();
       if (error) {
         result.errors.push({ row: i + 2, email, reason: error.message });
         result.skipped++;
+        continue;
       } else {
+        fanId = inserted?.id ?? null;
         result.created++;
       }
+    }
+
+    // Assign to community if specified — no emails sent, just a membership row.
+    if (communityId && fanId) {
+      await admin
+        .from("fan_community_memberships")
+        .upsert(
+          {
+            fan_id: fanId,
+            community_id: communityId,
+            total_points: 0,
+            current_tier: "bronze",
+            status: "active",
+            joined_at: new Date().toISOString(),
+          },
+          { onConflict: "fan_id,community_id", ignoreDuplicates: true },
+        );
     }
   }
 

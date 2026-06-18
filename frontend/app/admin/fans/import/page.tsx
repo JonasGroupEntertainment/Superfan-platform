@@ -36,12 +36,21 @@ function parseCSV(text: string): { rows: ImportRow[]; parseError: string | null 
   return { rows, parseError: null };
 }
 
+const COMMUNITIES = [
+  { slug: "raelynn", label: "RaeLynn" },
+  { slug: "danger-twins", label: "Danger Twins · Amy Stroup" },
+  { slug: "hunter-hawkins", label: "Hunter Hawkins" },
+  { slug: "jonas-group", label: "Team Jonas Group" },
+  { slug: "nellies", label: "Nellies" },
+];
+
 export default function FanImportPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ImportRow[]>([]);
   const [parseError, setParseError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "importing" | "done" | "error">("idle");
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [communityId, setCommunityId] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFile(f: File) {
@@ -67,7 +76,7 @@ export default function FanImportPage() {
     if (!preview.length) return;
     setStatus("importing");
     try {
-      const res = await importFansAction(preview);
+      const res = await importFansAction(preview, communityId || undefined);
       setResult(res);
       setStatus("done");
     } catch (e) {
@@ -100,6 +109,22 @@ export default function FanImportPage() {
           ))}
         </div>
         <p className="mt-3 text-white/40">* required — all others optional</p>
+      </div>
+
+      {/* Community selector */}
+      <div className="space-y-2">
+        <p className="text-xs uppercase tracking-widest text-white/50">Artist Community</p>
+        <select
+          value={communityId}
+          onChange={(e) => setCommunityId(e.target.value)}
+          className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none"
+        >
+          <option value="">— No community assignment —</option>
+          {COMMUNITIES.map((c) => (
+            <option key={c.slug} value={c.slug}>{c.label}</option>
+          ))}
+        </select>
+        <p className="text-xs text-white/40">Fans will be segmented to this artist community. No emails will be sent.</p>
       </div>
 
       {/* Drop zone */}
