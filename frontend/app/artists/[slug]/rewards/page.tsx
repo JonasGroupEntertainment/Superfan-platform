@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getArtistFromDb } from "@/lib/data/artists";
 import { listRewardsForCommunity, listMyRedemptions } from "@/lib/data/rewards";
 import Image from "next/image";
@@ -12,25 +13,24 @@ import { MarketplaceEmptyState, MIN_INVENTORY } from "@/components/marketplace-e
 
 export const dynamic = "force-dynamic";
 
-async function FanPoints() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  const { data: fan } = await supabase
-    .from("fans")
+async function getFanPoints(userId: string, communityId: string): Promise<number> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("fan_community_memberships")
     .select("total_points")
-    .eq("id", user.id)
+    .eq("fan_id", userId)
+    .eq("community_id", communityId)
     .maybeSingle();
+  return (data?.total_points as number | null) ?? 0;
+}
 
+async function FanPoints({ userId, communityId }: { userId: string; communityId: string }) {
+  const points = await getFanPoints(userId, communityId);
   return (
     <div className="rounded-lg border border-white/10 bg-black/30 px-4 py-2">
       <p className="text-xs uppercase tracking-wide text-white/60">Your Points</p>
       <p className="mt-1 text-2xl font-bold text-white">
-        {(fan?.total_points ?? 0).toLocaleString()}
+        {points.toLocaleString()}
       </p>
     </div>
   );
@@ -58,13 +58,14 @@ export default async function RewardsPage({
   const artist = await getArtistFromDb(slug);
   if (!artist) return notFound();
 
-  const [rewards, myRedemptions, rec, fanHandle] = await Promise.all([
+  const [rewards, myRedemptions, rec, fanHandle, fanPoints] = await Promise.all([
     listRewardsForCommunity(slug),
     listMyRedemptions(user.id),
     dismissRec
       ? Promise.resolve(null)
       : recommendReward({ fanId: user.id, communityId: slug }),
     getFanProfileSlug(user.id).catch(() => null),
+    getFanPoints(user.id, slug),
   ]);
 
   if (rewards.length < MIN_INVENTORY) {
@@ -96,7 +97,7 @@ export default async function RewardsPage({
 
         {/* Points Balance */}
         <div className="mb-6">
-          <FanPoints />
+          <FanPoints userId={user.id} communityId={slug} />
         </div>
 
         {/* Recommended hero card (Phase 10) */}
@@ -112,7 +113,7 @@ export default async function RewardsPage({
         {rewards.length > 0 ? (
           <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rewards.map((reward) => (
-              <RewardCardWithForm key={reward.id} reward={reward} artistSlug={slug} artistName={artist.name} fanHandle={fanHandle} />
+              <RewardCardWithForm key={reward.id} reward={reward} artistSlug={slug} artistName={artist.name} fanHandle={fanHandle} fanPoints={fanPoints} />
             ))}
           </div>
         ) : (

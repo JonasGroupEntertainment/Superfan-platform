@@ -16,6 +16,9 @@ interface RewardCardProps {
    *  to surface a "View your updated profile" link. Optional because
    *  RLS or signup races can briefly leave a fan handle-less. */
   fanHandle?: string | null;
+  /** Fan's current point balance for this community — used to gate the
+   *  Redeem button and surface a clear "earn X more" message. */
+  fanPoints?: number;
 }
 
 export default function RewardCardWithForm({
@@ -23,6 +26,7 @@ export default function RewardCardWithForm({
   artistSlug,
   artistName,
   fanHandle,
+  fanPoints = 0,
 }: RewardCardProps) {
   const [showForm, setShowForm] = useState(false);
 
@@ -62,12 +66,24 @@ export default function RewardCardWithForm({
           <p className="mt-2 text-xs text-white/50">Only {reward.stock} left</p>
         )}
 
-        <button
-          onClick={() => setShowForm(true)}
-          className="mt-4 w-full rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 px-3 py-2 text-xs font-medium text-white hover:opacity-90"
-        >
-          Redeem →
-        </button>
+        {fanPoints >= reward.point_cost ? (
+          <button
+            onClick={() => setShowForm(true)}
+            className="mt-4 w-full rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 px-3 py-2 text-xs font-medium text-white hover:opacity-90"
+          >
+            Redeem →
+          </button>
+        ) : (
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-center">
+            <p className="text-xs text-white/50">
+              Earn{" "}
+              <span className="font-semibold text-white/80">
+                {(reward.point_cost - fanPoints).toLocaleString()} more pts
+              </span>{" "}
+              to unlock
+            </p>
+          </div>
+        )}
       </div>
 
       {showForm && (

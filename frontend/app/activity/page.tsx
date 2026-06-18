@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -57,12 +58,14 @@ export default async function ActivityPage({
   const page = Math.max(1, parseInt(params.page ?? "1", 10));
   const offset = (page - 1) * PAGE_SIZE;
 
-  // Fetch fan total points
-  const { data: fan } = await supabase
-    .from("fans")
-    .select("total_points, first_name")
-    .eq("id", user.id)
-    .single();
+  // Sum points across all community memberships — the authoritative source
+  // post-4a; fans.total_points is legacy and may lag behind.
+  const admin = createAdminClient();
+  const { data: memberships } = await admin
+    .from("fan_community_memberships")
+    .select("total_points")
+    .eq("fan_id", user.id);
+  const fan = { total_points: (memberships ?? []).reduce((s, m) => s + ((m.total_points as number) ?? 0), 0) };
 
   // Fetch paginated ledger rows joined to communities for display_name
   const { data: rows, count } = await supabase

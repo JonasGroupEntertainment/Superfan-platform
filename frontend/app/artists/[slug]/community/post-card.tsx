@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type {
   ChallengeEntry,
   CommunityComment,
@@ -64,6 +64,25 @@ export default function PostCard({
   challengeEntries?: ChallengeEntry[];
 }) {
   const [showComments, setShowComments] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const handleShare = useCallback(async () => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app";
+    const postUrl = `${appUrl}/artists/${post.artist_slug}/community?post=${post.id}`;
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await (navigator as any).share({ title: post.title ?? "Check this out", url: postUrl });
+        return;
+      } catch (e: any) {
+        if (e?.name === "AbortError") return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(postUrl);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch {}
+  }, [post.id, post.artist_slug, post.title]);
 
   const accentRing =
     post.kind === "announcement"
@@ -206,6 +225,13 @@ export default function PostCard({
           className="ml-auto rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/70 hover:bg-black/50"
         >
           💬 {post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}
+        </button>
+        <button
+          onClick={handleShare}
+          title="Share this post"
+          className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/70 hover:bg-black/50 transition"
+        >
+          {shareCopied ? "✓ Copied" : "↗ Share"}
         </button>
       </div>
 
