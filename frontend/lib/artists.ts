@@ -29,6 +29,8 @@ export type Artist = {
   }[];
   merch: { title: string; tier: string; points: string }[];
   social: { label: string; href: string }[];
+  /** External merch store URL shown as a CTA until in-app merch is live. */
+  merchUrl?: string | null;
 };
 
 // Placeholder content for each artist — swap when Box assets are delivered.

@@ -192,6 +192,16 @@ export default async function ArtistPage({
             >
               {secondaryCta.label}
             </Link>
+            {artist.merchUrl && (
+              <a
+                href={artist.merchUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="rounded-full border border-white/30 bg-black/30 px-6 py-3 text-sm font-medium text-white/90 backdrop-blur hover:bg-white/10"
+              >
+                🛍 Shop merch ↗
+              </a>
+            )}
           </div>
           {!isSignedIn && (
             <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-aurora/30 bg-aurora/10 px-3 py-1 text-xs font-medium text-aurora">
@@ -341,7 +351,19 @@ export default async function ArtistPage({
 
       {/* Merch */}
       <section className="glass-card p-8">
-        <p className="text-sm uppercase tracking-wide text-white/60">Fan Experience rewards</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm uppercase tracking-wide text-white/60">Fan Experience rewards</p>
+          {artist.merchUrl && (
+            <a
+              href={artist.merchUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1 text-xs text-white/70 hover:border-white/40 hover:text-white transition"
+            >
+              🛍 Official merch store ↗
+            </a>
+          )}
+        </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {artist.merch.map((m) => (
             <div key={m.title} className="rounded-2xl bg-black/30 p-5">

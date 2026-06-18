@@ -36,6 +36,7 @@ type ArtistRow = {
   social: Array<{ label: string; href: string }> | null;
   active: boolean;
   sort_order: number;
+  merch_url: string | null;
 };
 
 function rowToArtist(row: ArtistRow, events: ArtistEvent[]): Artist {
@@ -68,6 +69,7 @@ function rowToArtist(row: ArtistRow, events: ArtistEvent[]): Artist {
         tier: (e.tier ?? "public") as "public" | "premium",
       })),
     merch: fallback?.merch ?? [],
+    merchUrl: row.merch_url ?? null,
   };
 }
 
@@ -84,7 +86,7 @@ export async function getArtistFromDb(slug: string): Promise<Artist | null> {
     const [{ data: artist, error: aErr }, { data: events, error: eErr }] = await Promise.all([
       supabase
         .from("artists")
-        .select("slug, name, tagline, bio, hero_image, hero_focal_x, hero_focal_y, accent_from, accent_to, genres, social, active, sort_order")
+        .select("slug, name, tagline, bio, hero_image, hero_focal_x, hero_focal_y, accent_from, accent_to, genres, social, active, sort_order, merch_url")
         .eq("slug", normalized)
         .eq("active", true)
         .maybeSingle(),
@@ -111,7 +113,7 @@ export async function listArtistsFromDb(): Promise<Artist[]> {
     const supabase = await createClient();
     const { data: artists, error } = await supabase
       .from("artists")
-      .select("slug, name, tagline, bio, hero_image, hero_focal_x, hero_focal_y, accent_from, accent_to, genres, social, active, sort_order")
+      .select("slug, name, tagline, bio, hero_image, hero_focal_x, hero_focal_y, accent_from, accent_to, genres, social, active, sort_order, merch_url")
       .eq("active", true)
       .order("sort_order");
     if (error || !artists || artists.length === 0) {
@@ -152,7 +154,7 @@ export async function listArtistsForAdmin(): Promise<
   const [{ data: artists }, { data: events }, { data: follows }] = await Promise.all([
     admin
       .from("artists")
-      .select("slug, name, tagline, bio, hero_image, hero_focal_x, hero_focal_y, accent_from, accent_to, genres, social, active, sort_order")
+      .select("slug, name, tagline, bio, hero_image, hero_focal_x, hero_focal_y, accent_from, accent_to, genres, social, active, sort_order, merch_url")
       .order("sort_order"),
     admin.from("artist_events").select("artist_slug"),
     admin.from("fan_artist_following").select("artist_slug"),
