@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toggleRsvpAction } from "./rsvp-actions";
+import InlineShareButton from "@/components/inline-share-button";
 
 export default function RsvpButton({
   eventId,
@@ -17,8 +18,11 @@ export default function RsvpButton({
 }) {
   const router = useRouter();
   const [rsvped, setRsvped] = useState(initialRsvped);
+  const [justRsvped, setJustRsvped] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app";
+  const artistUrl = `${appUrl}/artists/${artistSlug}`;
 
   async function handleClick() {
     const next = !rsvped;
@@ -34,6 +38,7 @@ export default function RsvpButton({
         setRsvped(!next);
         setError(result.error);
       } else {
+        if (next) setJustRsvped(true);
         router.refresh();
       }
     });
@@ -55,6 +60,15 @@ export default function RsvpButton({
       >
         {rsvped ? "✓ RSVPed" : atCapacity ? "Full" : "RSVP · +10 pts"}
       </button>
+      {justRsvped && (
+        <InlineShareButton
+          title="I'm going!"
+          text="Just RSVPed on Fan Engage — come join me."
+          url={artistUrl}
+          label="↗ Share"
+          className="text-xs text-aurora hover:text-white transition"
+        />
+      )}
       {error && <p className="text-xs text-rose-300">{error}</p>}
     </div>
   );

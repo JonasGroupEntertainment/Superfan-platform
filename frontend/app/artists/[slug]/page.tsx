@@ -16,6 +16,7 @@ import PremiumPaywall from "@/components/premium-paywall";
 import SocialIcon from "@/components/social-icon";
 import FollowButton from "./follow-button";
 import ShareButton from "@/components/share-button";
+import InlineShareButton from "@/components/inline-share-button";
 import RsvpButton from "./rsvp-button";
 import { ExpandableEventGrid } from "./expandable-event-grid";
 import { focalPointStyle } from "@/lib/images/focal-point";
@@ -322,6 +323,11 @@ export default async function ArtistPage({
                         Details ↗
                       </a>
                     )}
+                    <InlineShareButton
+                      title={e.title}
+                      text={`${e.title} — ${e.date}${e.location ? ` · ${e.location}` : ""}. RSVP on Fan Engage.`}
+                      url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app"}/artists/${artist.slug}`}
+                    />
                   </div>
                 )}
               </div>
