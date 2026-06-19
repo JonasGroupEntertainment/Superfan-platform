@@ -5,6 +5,7 @@ import { getCurrentCommunityId } from "@/lib/community";
 import { getFounderState, fmtPrice } from "@/lib/stripe-helpers";
 import { createCheckoutSessionAction } from "./actions";
 import { FounderSlotsCounter } from "./founder-slots-counter";
+import PromoCodeForm from "@/app/account/promo/promo-code-form";
 
 export const dynamic = "force-dynamic";
 
@@ -305,6 +306,16 @@ export default async function PremiumPage({
             </Link>{" "}
             before you can subscribe. It takes 60 seconds.
           </p>
+        )}
+
+        {/* Promo code entry — shown to signed-in non-premium fans */}
+        {user && !isPremium && (
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-white/50">
+              Have a promo code?
+            </p>
+            <PromoCodeForm />
+          </div>
         )}
 
         {/* Perks */}
