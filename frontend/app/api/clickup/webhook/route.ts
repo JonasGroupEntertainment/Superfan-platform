@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createHmac } from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,9 +23,22 @@ export const dynamic = "force-dynamic";
  * Requires PAPERCLIP_API_KEY + PAPERCLIP_API_URL in Vercel env vars.
  */
 export async function POST(request: Request) {
+  const rawBody = await request.text();
+
+  // Verify ClickUp HMAC signature when the secret is configured.
+  // Set CLICKUP_WEBHOOK_SECRET to the secret returned when registering the webhook.
+  const webhookSecret = process.env.CLICKUP_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const sig = request.headers.get("x-signature") ?? "";
+    const expected = createHmac("sha256", webhookSecret).update(rawBody).digest("hex");
+    if (sig !== expected) {
+      return NextResponse.json({ error: "invalid signature" }, { status: 401 });
+    }
+  }
+
   let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    body = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "invalid JSON" }, { status: 400 });
   }
@@ -47,7 +61,7 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log(`[clickup/webhook] ${event ?? "unknown"} → task ${task_id}`);
+  console.log("[clickup/webhook]", JSON.stringify({ event: event ?? "unknown", task_id }));
 
   // ── Paperclip status sync (Phase 4 — activate when tunnel is stable) ──
   const paperclipUrl = process.env.PAPERCLIP_API_URL;

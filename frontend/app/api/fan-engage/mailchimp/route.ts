@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { fanDataRateLimiter, getClientIp } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
+
+const ALLOWED_TAGS = ["fan", "early-access", "vip", "newsletter"] as const;
+type AllowedTag = (typeof ALLOWED_TAGS)[number];
 
 type SubscribePayload = {
   email: string;
@@ -17,6 +21,12 @@ type SubscribePayload = {
  * calling it twice with the same email is safe.
  */
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const clientIp = getClientIp(request.headers);
   const rateLimitResult = fanDataRateLimiter.check(clientIp);
 
@@ -74,7 +84,10 @@ export async function POST(request: NextRequest) {
         ...(lastName ? { LNAME: lastName } : {}),
       },
     };
-    if (tags && tags.length > 0) body.tags = tags;
+    const safeTags: AllowedTag[] = (tags ?? []).filter((t): t is AllowedTag =>
+      ALLOWED_TAGS.includes(t as AllowedTag)
+    );
+    if (safeTags.length > 0) body.tags = safeTags;
 
     const authHeader = `Basic ${Buffer.from(`anystring:${apiKey}`).toString("base64")}`;
 

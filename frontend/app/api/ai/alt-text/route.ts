@@ -59,6 +59,16 @@ export async function POST(req: Request) {
   if (!imageUrl) {
     return NextResponse.json({ altText: "" });
   }
+  // Restrict fetches to trusted storage/CDN hosts to prevent SSRF
+  try {
+    const { hostname } = new URL(imageUrl);
+    const allowed = /\.(supabase\.co|supabase\.in|cloudinary\.com|imgix\.net|fanengagepro\.com)$/i;
+    if (!allowed.test(hostname)) {
+      return NextResponse.json({ altText: "" });
+    }
+  } catch {
+    return NextResponse.json({ altText: "" });
+  }
 
   // Lookup artist name for context (best-effort)
   let artistName: string | null = null;

@@ -34,10 +34,12 @@ function unauthorized() {
 export async function GET(request: Request) {
   // ── Auth ────────────────────────────────────────────────────────────────
   const expected = process.env.CRON_SECRET;
-  if (expected) {
-    const auth = request.headers.get("authorization") ?? "";
-    if (auth !== `Bearer ${expected}`) return unauthorized();
+  if (!expected) {
+    console.error("[fan-scoring] CRON_SECRET is not configured — refusing unauthenticated access");
+    return NextResponse.json({ ok: false, error: "CRON_SECRET not configured" }, { status: 503 });
   }
+  const auth = request.headers.get("authorization") ?? "";
+  if (auth !== `Bearer ${expected}`) return unauthorized();
 
   // ── Legal gate ──────────────────────────────────────────────────────────
   const legalCleared = process.env.SUPER_FAN_SCORING_LEGAL_CLEARED === "true";

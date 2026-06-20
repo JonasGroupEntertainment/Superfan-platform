@@ -60,6 +60,10 @@ export async function POST(request: NextRequest) {
     if (!phone) {
       return NextResponse.json({ error: "Phone number required" }, { status: 400 });
     }
+    // Require E.164 format to prevent passing arbitrary strings to Twilio
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+      return NextResponse.json({ error: "Invalid phone number format" }, { status: 400 });
+    }
 
     const client = twilio(accountSid, authToken);
     // Welcome text — points at the first point-earning action so the fan has

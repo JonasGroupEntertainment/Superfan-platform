@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAdminUser } from "@/lib/admin";
+import { getAdminContext } from "@/lib/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,27 +12,30 @@ export const dynamic = "force-dynamic";
  * Protected by admin auth.
  */
 
-async function requireAdmin() {
-  const admin = await getAdminUser();
-  if (!admin) {
-    throw new Error("Unauthorized");
-  }
-  return admin;
+async function requireAdminContext() {
+  const ctx = await getAdminContext();
+  if (!ctx) throw new Error("Unauthorized");
+  return ctx;
 }
 
 export async function GET(request: Request) {
   try {
-    await requireAdmin();
+    const ctx = await requireAdminContext();
     const { searchParams } = new URL(request.url);
     const artistSlug = searchParams.get("artist_slug");
+
+    // Non-super-admins can only see their own community's influencers
+    const scopedSlug = ctx.isSuperAdmin ? artistSlug : ctx.currentCommunityId;
 
     const db = createAdminClient();
     let query = db
       .from("influencers")
       .select("id, handle, platform, real_name, artist_slug, status, created_at");
 
-    if (artistSlug) {
-      query = query.eq("artist_slug", artistSlug);
+    if (scopedSlug) {
+      query = query.eq("artist_slug", scopedSlug);
+    } else if (!ctx.isSuperAdmin) {
+      return NextResponse.json({ ok: false, error: "No community selected" }, { status: 403 });
     }
 
     const { data, error } = await query.order("created_at", { ascending: false });
@@ -52,7 +55,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    const ctx = await requireAdminContext();
     const body = await request.json();
     const { id, handle, platform, real_name, artist_slug, status } = body;
 
@@ -61,6 +64,11 @@ export async function POST(request: Request) {
         { ok: false, error: "handle, platform, and artist_slug are required" },
         { status: 400 },
       );
+    }
+
+    // Non-super-admins can only manage their own community
+    if (!ctx.isSuperAdmin && artist_slug !== ctx.currentCommunityId) {
+      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
     }
 
     const db = createAdminClient();

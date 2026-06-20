@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAdminUser } from "@/lib/admin";
+import { getAdminContext } from "@/lib/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,11 +13,9 @@ export const dynamic = "force-dynamic";
  */
 
 async function requireAdmin() {
-  const admin = await getAdminUser();
-  if (!admin) {
-    throw new Error("Unauthorized");
-  }
-  return admin;
+  const ctx = await getAdminContext();
+  if (!ctx) throw new Error("Unauthorized");
+  return ctx;
 }
 
 export async function GET(

@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       .from("fans")
       .update(updates)
       .eq("id", user.id)
-      .select()
+      .select("id, first_name, current_tier, total_points, profile_slug")
       .single();
 
     if (updateErr) {

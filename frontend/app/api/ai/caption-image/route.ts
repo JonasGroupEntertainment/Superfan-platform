@@ -46,6 +46,19 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  // Restrict fetches to trusted storage/CDN hosts to prevent SSRF
+  try {
+    const { hostname } = new URL(imageUrl);
+    const allowed = /\.(supabase\.co|supabase\.in|cloudinary\.com|imgix\.net|fanengagepro\.com)$/i;
+    if (!allowed.test(hostname)) {
+      return NextResponse.json(
+        { error: "imageUrl host is not allowed." },
+        { status: 400 },
+      );
+    }
+  } catch {
+    return NextResponse.json({ error: "Invalid imageUrl." }, { status: 400 });
+  }
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json(
