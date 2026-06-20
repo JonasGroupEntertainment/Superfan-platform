@@ -6,6 +6,9 @@ import { awardPoints } from "@/lib/points/award";
 
 export const runtime = "nodejs";
 
+const POINTS_SIGNUP_BONUS = 100;
+const POINTS_REFERRAL_AWARD = 150;
+
 type OnboardPayload = {
   firstName?: string;
   lastName?: string;
@@ -130,14 +133,14 @@ export async function POST(request: NextRequest) {
               referred_id: user.id,
               referred_email: user.email ?? null,
               status: "verified",
-              points_awarded: 150,
+              points_awarded: POINTS_REFERRAL_AWARD,
               verified_at: new Date().toISOString(),
             },
             { onConflict: "referred_id" },
           );
           await awardPoints(admin, {
             fanId: referrer.id,
-            delta: 150,
+            delta: POINTS_REFERRAL_AWARD,
             source: "referral",
             sourceRef: user.id,
             note: `Referred by ${user.email}`,
@@ -167,7 +170,7 @@ export async function POST(request: NextRequest) {
       if (!existing) {
         await awardPoints(admin, {
           fanId: user.id,
-          delta: 100,
+          delta: POINTS_SIGNUP_BONUS,
           source: "signup_bonus",
           sourceRef: sourceRef,
           note: "Welcome to Fan Engage",

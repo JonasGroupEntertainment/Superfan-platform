@@ -124,6 +124,12 @@ export default async function AdminCommunityPage() {
         <p className="mt-2 text-sm text-white/60">
           Cross-artist feed — pin, delete, and jump to the fan who authored a post.
         </p>
+        <Link
+          href="/admin/community/seed"
+          className="mt-3 inline-flex rounded-full border border-white/20 px-4 py-1.5 text-xs text-white/70 hover:bg-white/10"
+        >
+          Seed starter content →
+        </Link>
       </div>
 
       {/* Posts */}
