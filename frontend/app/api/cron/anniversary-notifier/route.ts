@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { NextResponse } from "next/server";
 import { runDailyAnniversaryScan } from "@/lib/anniversaries/celebrate";
 
@@ -23,13 +24,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(req: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
-  }
+  const authErr = verifyCronAuth(req);
+  if (authErr) return authErr;
 
   try {
     const result = await runDailyAnniversaryScan();

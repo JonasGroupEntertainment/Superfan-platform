@@ -31,7 +31,8 @@ export async function importFansAction(
   rows: ImportRow[],
   communityId?: string,
 ): Promise<ImportResult> {
-  await getAdminUser();
+  const adminUser = await getAdminUser();
+  if (!adminUser) throw new Error("Unauthorized");
   const admin = createAdminClient();
 
   const result: ImportResult = {

@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
@@ -54,13 +55,8 @@ function priorMonthRange(): { start: string; end: string } {
 
 export async function GET(request: Request) {
   // Auth: verify CRON_SECRET bearer token
-  const expected = process.env.CRON_SECRET;
-  if (expected) {
-    const auth = request.headers.get("authorization") ?? "";
-    if (auth !== `Bearer ${expected}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authErr = verifyCronAuth(request);
+  if (authErr) return authErr;
 
   const result: PayoutResult = {
     processed: 0,

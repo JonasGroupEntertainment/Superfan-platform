@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 /**
  * /api/cron/alt-text-backfill (FE)
  *
@@ -39,13 +40,8 @@ interface RunResult {
 }
 
 export async function GET(req: Request) {
-  const expected = process.env.CRON_SECRET;
-  if (expected) {
-    const auth = req.headers.get("authorization") ?? "";
-    if (auth !== `Bearer ${expected}`) {
-      return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-    }
-  }
+  const authErr = verifyCronAuth(req);
+  if (authErr) return authErr;
 
   const admin = createAdminClient();
 

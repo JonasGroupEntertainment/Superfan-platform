@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { moderateRow, type ModerateSourceTable } from "@/lib/moderation";
@@ -36,13 +37,8 @@ interface BackfillSummary {
 }
 
 export async function GET(request: Request) {
-  const expected = process.env.CRON_SECRET;
-  if (expected) {
-    const auth = request.headers.get("authorization") ?? "";
-    if (auth !== `Bearer ${expected}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const authErr = verifyCronAuth(request);
+  if (authErr) return authErr;
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json(

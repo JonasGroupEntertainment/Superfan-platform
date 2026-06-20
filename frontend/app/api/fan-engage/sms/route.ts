@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import twilio from "twilio";
 import { fanDataRateLimiter, getClientIp } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,12 @@ const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
 const defaultFrom = process.env.TWILIO_DEFAULT_FROM;
 
 export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const clientIp = getClientIp(request.headers);
   const rateLimitResult = fanDataRateLimiter.check(clientIp);
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import twilio from "twilio";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -50,6 +51,22 @@ function normalizePhone(p: string | null | undefined): string {
 export async function POST(request: Request) {
   try {
     const form = await request.formData();
+
+    // Verify Twilio signature before processing — prevents spoofed STOP/START
+    // from arbitrary callers who know our phone number.
+    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+    if (twilioAuthToken) {
+      const sig = request.headers.get("x-twilio-signature") ?? "";
+      const appUrl =
+        process.env.NEXT_PUBLIC_APP_URL ?? "https://fanengagepro.com";
+      const webhookUrl = `${appUrl}/api/twilio/inbound`;
+      const params: Record<string, string> = {};
+      for (const [k, v] of form.entries()) params[k] = String(v);
+      if (!twilio.validateRequest(twilioAuthToken, sig, webhookUrl, params)) {
+        return new NextResponse("Forbidden", { status: 403 });
+      }
+    }
+
     const from = String(form.get("From") ?? "");
     const bodyRaw = String(form.get("Body") ?? "").trim();
     const keyword = bodyRaw.toUpperCase().split(/\s+/)[0] ?? "";
