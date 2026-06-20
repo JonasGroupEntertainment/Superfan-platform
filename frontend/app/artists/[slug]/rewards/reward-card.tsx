@@ -5,9 +5,10 @@ import DropCountdown from "@/components/drop-countdown";
 import Image from "next/image";
 import { RedeemForm } from "./redeem-form";
 import InlineShareButton from "@/components/inline-share-button";
+import type { RewardRow } from "@/lib/data/rewards";
 
 interface RewardCardProps {
-  reward: any;
+  reward: RewardRow;
   /** Artist slug — passed through to RedeemForm so its success-state
    *  share button can build a working share URL.  */
   artistSlug: string;

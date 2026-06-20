@@ -69,14 +69,14 @@ async function getFoundersForCommunity(
     if (membershipsError || !memberships) return null;
 
     const founders: Founder[] = (memberships ?? [])
-      .map((row: any) => {
+      .map((row: Record<string, unknown>) => {
         const fan = Array.isArray(row.fans) ? row.fans[0] : row.fans || {};
         return {
-          fan_id: row.fan_id,
-          founder_number: row.founder_number,
-          first_name: fan.first_name,
-          avatar_url: fan.avatar_url,
-          joined_at: row.joined_at,
+          fan_id: String(row.fan_id ?? ""),
+          founder_number: (row.founder_number as number) ?? 0,
+          first_name: (fan.first_name as string | null) ?? null,
+          avatar_url: fan.avatar_url as string | null,
+          joined_at: String(row.joined_at ?? ""),
         };
       })
       .filter((f) => f.founder_number !== null);
