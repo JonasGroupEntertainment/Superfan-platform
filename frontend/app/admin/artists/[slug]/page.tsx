@@ -6,6 +6,7 @@ import { listRsvpsForEvent } from "@/lib/data/events";
 import ArtistEditForm from "./edit-form";
 import CreateEventForm from "./create-event-form";
 import EditableEventRow from "./editable-event-row";
+import CheckinQrCard from "@/components/checkin-qr-card";
 import {
   deleteEventAction,
   sendReminderNowAction,
@@ -231,6 +232,12 @@ export default async function AdminArtistEditPage({
 
         <CreateEventForm slug={slug} />
       </section>
+
+      {/* Check-in QR — print or display at the venue / merch table */}
+      <CheckinQrCard
+        artistSlug={artist.slug as string}
+        artistName={artist.name as string}
+      />
     </div>
   );
 }
