@@ -34,7 +34,7 @@ export function getStripe(): Stripe {
     typescript: true,
     appInfo: {
       name: "Fan Engage",
-      url: "https://fan-engage-pearl.vercel.app",
+      url: process.env.NEXT_PUBLIC_APP_URL ?? "https://fanengagepro.com",
     },
   });
   globalThis.__stripeClient = client;

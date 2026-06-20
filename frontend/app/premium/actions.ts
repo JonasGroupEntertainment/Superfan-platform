@@ -119,7 +119,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
 
   // 7) Create the Checkout Session
   const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "fan-engage-pearl.vercel.app";
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "fanengagepro.com";
   const proto = h.get("x-forwarded-proto") ?? "https";
   const origin = `${proto}://${host}`;
 
