@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { getCurrentFan } from "@/lib/data/fan";
 import { getMyReferrals, getReferralLeaderboard } from "@/lib/data/referrals";
+import { listArtistsFromDb } from "@/lib/data/artists";
 import InviteQRCode from "@/components/invite-qr";
 import CopyLinkButton from "./copy-link-button";
 import NativeShareButton from "./native-share-button";
@@ -23,30 +25,38 @@ const previewLeaderboard = [
 ];
 
 async function buildInviteUrl(code: string | null | undefined): Promise<string> {
+  const origin = await getAppOrigin();
+  if (!code) return `${origin}/invite/your-code`;
+  return `${origin}/invite/${code}`;
+}
+
+async function getAppOrigin(): Promise<string> {
   const headerList = await headers();
   const host =
     process.env.NEXT_PUBLIC_APP_URL ??
     (headerList.get("x-forwarded-host") ?? headerList.get("host"));
   const proto = headerList.get("x-forwarded-proto") ?? "https";
-  const origin = host?.startsWith("http") ? host : `${proto}://${host}`;
-  if (!code) return `${origin}/invite/your-code`;
-  return `${origin}/invite/${code}`;
+  return host?.startsWith("http") ? host : `${proto}://${host}`;
 }
 
 export const metadata = { title: "Referrals" };
 
 export default async function ReferralsPage() {
-  const [fan, myReferrals, leaderboard] = await Promise.all([
+  const [fan, myReferrals, leaderboard, artists] = await Promise.all([
     getCurrentFan(),
     getMyReferrals(),
     getReferralLeaderboard(5),
+    listArtistsFromDb(),
   ]);
 
   const isSignedIn = fan !== null;
+  const origin = await getAppOrigin();
   const inviteUrl = await buildInviteUrl(fan?.referral_code);
   const myCount = myReferrals.length;
   const convertedCount = myReferrals.filter((r) => r.status === "verified").length;
   const pointsEarned = myReferrals.reduce((sum, r) => sum + (r.points_awarded ?? 0), 0);
+  const inviterName = fan?.first_name ?? "me";
+  const featuredArtists = artists.slice(0, 4);
 
   const leaderboardRows = isSignedIn
     ? leaderboard.map((row) => ({
@@ -65,15 +75,15 @@ export default async function ReferralsPage() {
             <PreviewSignupBanner
               eyebrow="🎟️ Preview"
               headline="Sign up to get your invite link"
-              body="Members earn 150 bonus points every time a friend joins. Hit milestones and the rewards stack: signed postcards at 3 referrals, exclusive merch at 5, VIP livestream access at 10."
+              body="Members earn points every time a friend joins, but the best shares are artist-specific: invite someone into a real fan experience, not just a generic account."
               bullets={[
-                "+150 pts every verified signup",
-                "Milestones unlock real merch and experiences",
-                "Top referrers get featured in the public leaderboard",
+                "Invite friends into specific artist hubs",
+                "Both fans get a clear reason to join and keep going",
+                "Milestones unlock merch, livestreams, and status moments",
               ]}
               primaryCta="Sign up free →"
               nextPath="/referrals"
-              firstRewardLine="🎁 Earn 150 bonus points the first time a friend joins."
+              firstRewardLine="🎁 Join free, then invite friends into your favorite artist experience."
             />
           )}
 
@@ -84,21 +94,26 @@ export default async function ReferralsPage() {
             </h1>
             <p className="mt-4 text-sm text-white/70">
               {isSignedIn
-                ? `You've invited ${myCount} fan${myCount === 1 ? "" : "s"} so far. Keep sharing to climb the ladder.`
-                : "Members get a personal invite link. Share it and earn bonus points, badges, and early access rewards every time a friend joins."}
+                ? `You've invited ${myCount} fan${myCount === 1 ? "" : "s"} so far. Share an artist experience and help a friend get their first 100 points while you earn 150 after they join.`
+                : "Members get personal invite links they can attach to artists, drops, shows, and badges so every share feels like a real invitation."}
             </p>
             {isSignedIn && (
               <>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <code className="flex-1 rounded-2xl bg-black/40 px-4 py-3 text-sm">{inviteUrl}</code>
                   <CopyLinkButton url={inviteUrl} />
-                  <NativeShareButton url={inviteUrl} />
+                  <NativeShareButton
+                    url={inviteUrl}
+                    title="Join me on Fan Engage"
+                    text={`Join me on Fan Engage. You get 100 points when you sign up, and I get 150 when you finish joining.`}
+                  />
                 </div>
 
                 {myCount === 0 ? (
                   <div className="mt-6 rounded-2xl border border-dashed border-purple-500/40 bg-purple-900/20 px-5 py-4 text-sm text-white/80">
-                    <span className="font-semibold text-purple-300">Earn 150 points</span> for every
-                    verified signup — share your link above to get started.
+                    <span className="font-semibold text-purple-300">Start with one artist.</span>{" "}
+                    Send a friend into the fan experience you would actually talk about. They get
+                    100 signup points, and you get 150 points after they join.
                   </div>
                 ) : (
                   <div className="mt-6 grid grid-cols-3 gap-3 text-center">
@@ -118,6 +133,84 @@ export default async function ReferralsPage() {
                 )}
               </>
             )}
+          </section>
+
+          <section className="glass-card p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-sm uppercase tracking-wide text-white/60">
+                  Artist invites
+                </p>
+                <h2
+                  className="mt-1 text-2xl font-semibold"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Share an experience, not a bare link
+                </h2>
+              </div>
+              <p className="max-w-md text-sm text-white/60">
+                These links drop a friend into the artist context first, then the signup flow carries that
+                artist through onboarding.
+              </p>
+            </div>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {featuredArtists.map((artist) => {
+                const artistInviteUrl = isSignedIn && fan?.referral_code
+                  ? `${origin}/invite/${fan.referral_code}?artist=${encodeURIComponent(artist.slug)}`
+                  : `${origin}/signup?ref=${encodeURIComponent(artist.slug)}`;
+                const shareText = `I found ${artist.name}'s Fan Experience. Join through ${inviterName} and get your first 100 points toward drops, events, and rewards.`;
+                return (
+                  <article
+                    key={artist.slug}
+                    className="rounded-2xl border border-white/10 bg-black/25 p-5"
+                  >
+                    <p className="text-xs uppercase tracking-wide text-white/50">
+                      {artist.genres.slice(0, 2).join(" · ") || "Fan Experience"}
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold">{artist.name}</h3>
+                    <p className="mt-1 min-h-[2.5rem] text-sm text-white/60">
+                      {artist.tagline || "Drops, rewards, events, and fan-only moments."}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {isSignedIn && <CopyLinkButton url={artistInviteUrl} />}
+                      <NativeShareButton
+                        url={artistInviteUrl}
+                        title={`Join ${artist.name}'s Fan Experience`}
+                        text={shareText}
+                      />
+                      <Link
+                        href={`/artists/${artist.slug}`}
+                        className="rounded-full border border-white/15 px-4 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+                      >
+                        Preview →
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="grid gap-4 md:grid-cols-3">
+            {[
+              {
+                title: "First 72 hours",
+                body: "Follow one artist, earn a first badge, then invite one friend while the experience is fresh.",
+              },
+              {
+                title: "Bring friends to shows",
+                body: "After each RSVP, prompt fans to invite two friends into that artist's event page.",
+              },
+              {
+                title: "Unlock together",
+                body: "Use campaign goals like 100 founding fans or 50 RSVPs to make sharing feel collective.",
+              },
+            ].map((card) => (
+              <div key={card.title} className="rounded-2xl bg-white/10 p-5">
+                <p className="text-sm font-semibold">{card.title}</p>
+                <p className="mt-2 text-sm text-white/65">{card.body}</p>
+              </div>
+            ))}
           </section>
 
           <section className="grid gap-6 md:grid-cols-2">

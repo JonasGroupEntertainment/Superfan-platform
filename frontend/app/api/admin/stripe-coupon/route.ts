@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     // Attach a promotion code that fans enter at checkout
     await stripe.promotionCodes.create({
-      coupon: coupon.id,
+      promotion: { type: "coupon", coupon: coupon.id },
       code: promoCode,
       ...(maxRedemptions ? { max_redemptions: maxRedemptions } : {}),
     });

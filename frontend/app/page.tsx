@@ -19,16 +19,16 @@ import { gatherWeeklyRecap } from "@/lib/personal-recap/gather";
 // of this.
 
 const journeyCards = [
-  { title: "Complete Backstage Challenge", points: "+250 pts" },
-  { title: "Share Your Listening Story", points: "+150 pts" },
-  { title: "Vote in Today’s Poll", points: "+75 pts" },
+  { title: "Follow your first artist", points: "+25 pts" },
+  { title: "Unlock your first badge", points: "+100 pts" },
+  { title: "Invite one friend in", points: "+150 pts" },
 ];
 
 const quickActions: { label: string; href: string }[] = [
   { label: "Share referral link", href: "/referrals" },
   { label: "Browse marketplace", href: "/marketplace" },
   { label: "Check rewards", href: "/rewards" },
-  { label: "Invite a friend", href: "/onboarding" },
+  { label: "Invite a friend", href: "/referrals" },
 ];
 
 function formatPts(n: number | null | undefined) {

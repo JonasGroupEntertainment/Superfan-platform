@@ -80,11 +80,18 @@ export default async function RewardsPage() {
   }
 
   // Tier progress — real if signed in, fallback if preview.
+  const previewTotalPoints = 1200;
   const currentSlug = (fan?.current_tier ?? "bronze") as TierSlug;
   const currentTier = tiers.find((t) => t.slug === currentSlug);
-  const nextTier = kpis?.next_tier ?? null;
-  const totalPoints = kpis?.total_points ?? 8500;
-  const toNext = kpis?.points_to_next_tier ?? (12500 - 8500);
+  const totalPoints = kpis?.total_points ?? previewTotalPoints;
+  const previewNextTier =
+    tiers
+      .filter((t) => t.min_points > totalPoints)
+      .sort((a, b) => a.min_points - b.min_points)[0] ?? null;
+  const nextTier = kpis?.next_tier ?? (!isSignedIn ? previewNextTier : null);
+  const toNext =
+    kpis?.points_to_next_tier ??
+    (nextTier ? Math.max(0, nextTier.min_points - totalPoints) : 0);
   const nextThreshold =
     nextTier?.min_points ?? (currentTier?.min_points ?? 0) + toNext;
   const fromCurrent = currentTier?.min_points ?? 0;

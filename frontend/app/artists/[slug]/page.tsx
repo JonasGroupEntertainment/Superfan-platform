@@ -1,6 +1,7 @@
 import Link from "next/link";
 import LeaderboardMiniCard from "@/components/leaderboard-mini-card";
 import { LatestStrip } from "@/components/latest-strip";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { listArtists } from "@/lib/artists";
@@ -112,6 +113,17 @@ export default async function ArtistPage({
     ? { label: "My rewards", href: "/rewards" }
     : { label: "See merchandise", href: "/marketplace" };
 
+  const headerList = await headers();
+  const host =
+    process.env.NEXT_PUBLIC_APP_URL ??
+    (headerList.get("x-forwarded-host") ?? headerList.get("host"));
+  const proto = headerList.get("x-forwarded-proto") ?? "https";
+  const origin = host?.startsWith("http") ? host : `${proto}://${host}`;
+  const artistShareUrl =
+    isSignedIn && fan?.referral_code
+      ? `${origin}/invite/${fan.referral_code}?artist=${encodeURIComponent(artist.slug)}`
+      : `${origin}/artists/${artist.slug}`;
+
   const showFounderLink = founderData && founderData.cap > 0;
 
   return (
@@ -174,10 +186,14 @@ export default async function ArtistPage({
               <FollowButton artistSlug={artist.slug} initialFollowing={isFollowing} />
             )}
             <ShareButton
-              title={`Check out ${artist.name} on Fan Engage`}
-              text={`${artist.name} — ${artist.tagline ?? "fan experience on Fan Engage"}`}
-              url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app"}/artists/${artist.slug}`}
-              label="Share"
+              title={`Join ${artist.name}'s Fan Experience`}
+              text={
+                isSignedIn && fan?.referral_code
+                  ? `I found ${artist.name}'s Fan Experience. Join through me and get your first 100 points toward drops, events, and rewards.`
+                  : `${artist.name} — ${artist.tagline ?? "fan experience on Fan Engage"}`
+              }
+              url={artistShareUrl}
+              label={isSignedIn && fan?.referral_code ? "Invite friends" : "Share"}
               variant="ghost"
             />
             <Link
@@ -335,8 +351,17 @@ export default async function ArtistPage({
                     )}
                     <InlineShareButton
                       title={e.title}
-                      text={`${e.title} — ${e.date}${e.location ? ` · ${e.location}` : ""}. RSVP on Fan Engage.`}
-                      url={`${process.env.NEXT_PUBLIC_APP_URL ?? "https://fan-engage-pearl.vercel.app"}/artists/${artist.slug}`}
+                      text={
+                        isSignedIn && fan?.referral_code
+                          ? `I just found ${artist.name}'s ${e.title}. Join the Fan Experience and come with me.`
+                          : `${e.title} — ${e.date}${e.location ? ` · ${e.location}` : ""}. RSVP on Fan Engage.`
+                      }
+                      url={
+                        isSignedIn && fan?.referral_code
+                          ? `${origin}/invite/${fan.referral_code}?artist=${encodeURIComponent(artist.slug)}&event=${encodeURIComponent(eventId)}`
+                          : `${origin}/artists/${artist.slug}`
+                      }
+                      label="Bring friends ↗"
                     />
                   </div>
                 )}
